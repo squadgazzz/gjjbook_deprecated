@@ -1,0 +1,16 @@
+CREATE TABLE `Accounts` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(45) NOT NULL,
+  `middlename` VARCHAR(45) NULL,
+  `surname` VARCHAR(45) NOT NULL,
+  `sex` VARCHAR(45) NOT NULL,
+  `birthdate` DATE NOT NULL,
+  `homeaddress` VARCHAR(45) NULL,
+  `workaddress` VARCHAR(45) NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `icq` INT NULL,
+  `skype` VARCHAR(45) NULL,
+  `additionalinfo` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC),
+  UNIQUE INDEX `id_UNIQUE` (`id` ASC))
