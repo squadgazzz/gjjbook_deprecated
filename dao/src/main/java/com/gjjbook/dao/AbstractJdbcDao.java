@@ -73,6 +73,10 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
 
     @Override
     public void update(T object) throws PersistException {
+        if (object == null) {
+            return;
+        }
+
         String sql = getUpdateQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             prepareStatementForUpdate(statement, object);
@@ -89,6 +93,10 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
 
     @Override
     public void delete(T object) throws PersistException {
+        if (object == null) {
+            return;
+        }
+
         String sql = getDeleteQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             prepareStatementForDelete(statement, object);

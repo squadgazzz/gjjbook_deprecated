@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class AccountDaoTest {
 
     @Before
     public void setUp() throws Exception, PersistException {
-        daoFactory = new DbDaoFactory("src/test/resources/db.properties");
+        daoFactory = new DbDaoFactory();
         connection = daoFactory.getContext();
         RunScript runScript = new RunScript();
         FileReader fr = new FileReader("src/test/resources/createAccounts.sql");
@@ -104,6 +105,7 @@ public class AccountDaoTest {
                 phones, "home", "work",
                 email, 7894, "skype",
                 null, null, null);
+
         return accountDao.create(account);
     }
 

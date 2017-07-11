@@ -13,6 +13,10 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
 
     @Override
     public T create(T object) throws PersistException {
+        if (object == null) {
+            return null;
+        }
+
         T persistInstance;
         String sql = getCreateQuery();
         PK generatedId;

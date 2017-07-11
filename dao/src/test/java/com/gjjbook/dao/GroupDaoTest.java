@@ -21,7 +21,7 @@ public class GroupDaoTest {
 
     @Before
     public void setUp() throws Exception, PersistException {
-        daoFactory = new DbDaoFactory("src/test/resources/db.properties");
+        daoFactory = new DbDaoFactory();
         connection = daoFactory.getContext();
         RunScript runScript = new RunScript();
         FileReader fr = new FileReader("src/test/resources/createGroups.sql");

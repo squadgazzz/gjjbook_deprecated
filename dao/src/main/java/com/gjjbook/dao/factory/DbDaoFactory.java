@@ -8,6 +8,8 @@ import com.gjjbook.domain.Phone;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.*;
 
@@ -22,11 +24,7 @@ public class DbDaoFactory implements DaoFactory<Connection> {
     private List<Connection> connections;
 
     public DbDaoFactory() throws PersistException {
-        this("dao/src/main/resources");
-    }
-
-    public DbDaoFactory(String dbPropertiesFileName) throws PersistException {
-        setDbProperties(dbPropertiesFileName);
+        setDbProperties();
         connectionPool = new ConnectionPool(driver, user, password, url, connectionsCount);
         connections = new LinkedList<>();
         fillCreators();
@@ -67,10 +65,10 @@ public class DbDaoFactory implements DaoFactory<Connection> {
         });
     }
 
-    private void setDbProperties(String fileName) throws PersistException {
-        try (FileInputStream fis = new FileInputStream(fileName)) {
+    private void setDbProperties() throws PersistException {
+        try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("db.properties"))) {
             Properties properties = new Properties();
-            properties.load(fis);
+            properties.load(is);
 
             url = properties.getProperty("db.url");
             user = properties.getProperty("db.login");
