@@ -1,15 +1,16 @@
 package com.gjjbook;
 
+import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.GenericDao;
-import com.gjjbook.dao.PersistException;
 import com.gjjbook.dao.factory.DaoFactory;
 import com.gjjbook.domain.Account;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class) // DONE 16.07.2017: run with mockitoJunitRunner
 public class AccountServiceTest {
 
     @Mock
@@ -34,13 +36,7 @@ public class AccountServiceTest {
     private AccountService accountService;
 
     @Before
-    public void setUp() throws Exception, PersistException {
-        MockitoAnnotations.initMocks(this);
-
-        Connection connectionMock = mock(Connection.class);
-        when(factory.getContext()).thenReturn(connectionMock);
-        when(factory.getDao(factory.getContext(), Account.class)).thenReturn(accountDao);
-
+    public void setUp() throws Exception, ServiceException, DaoException {
         accountService = new AccountService(factory, accountDao);
     }
 
@@ -50,7 +46,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void create() throws Exception, PersistException {
+    public void create() throws Exception, DaoException, ServiceException {
         when(accountDao.create(new Account())).thenReturn(account);
 
         assertEquals(account, accountService.create(new Account()));
@@ -63,21 +59,21 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void update() throws Exception, PersistException {
+    public void update() throws Exception, DaoException, ServiceException {
         accountService.update(account);
 
         verify(accountDao).update(account);
     }
 
     @Test
-    public void delete() throws Exception, PersistException {
+    public void delete() throws Exception, DaoException, ServiceException {
         accountService.delete(account);
 
         verify(accountDao).delete(account);
     }
 
     @Test
-    public void getByPk() throws Exception, PersistException {
+    public void getByPk() throws Exception, DaoException, ServiceException {
         when(accountDao.getByPK(1)).thenReturn(account);
 
         assertEquals(account, accountService.getByPk(1));
@@ -89,7 +85,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void getAll() throws Exception, PersistException {
+    public void getAll() throws Exception, DaoException, ServiceException {
         List<Account> accounts = new ArrayList<>();
         accounts.add(account);
 
@@ -101,7 +97,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void addFriend() throws Exception, PersistException {
+    public void addFriend() throws Exception, DaoException, ServiceException {
         Account friend = mock(Account.class);
         List<Account> friends = new ArrayList<>();
         friends.add(friend);
@@ -116,7 +112,7 @@ public class AccountServiceTest {
     }
 
     @Test
-    public void removeFriend() throws Exception, PersistException {
+    public void removeFriend() throws Exception, DaoException, ServiceException {
         Account friendOne = new Account();
         friendOne.setEmail("1");
         Account friendTwo = new Account();
