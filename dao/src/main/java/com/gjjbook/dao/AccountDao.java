@@ -40,7 +40,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     }
 
     @Override
-    protected List<Account> parseResultSet(ResultSet rs) throws PersistException {
+    protected List<Account> parseResultSet(ResultSet rs) throws DaoException {
         List<Account> result = new LinkedList<>();
         try {
             while (rs.next()) {
@@ -61,13 +61,13 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                 result.add(account);
             }
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return result;
     }
 
     @Override
-    protected void prepareStatementForInsert(PreparedStatement statement, Account object) throws PersistException {
+    protected void prepareStatementForInsert(PreparedStatement statement, Account object) throws DaoException {
         try {
             statement.setString(1, object.getName());
             statement.setString(2, object.getMiddleName());
@@ -81,17 +81,17 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
             statement.setString(10, object.getSkype());
             statement.setString(11, object.getAdditionalInfo());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    protected void prepareStatementForUpdate(PreparedStatement statement, Account object) throws PersistException {
+    protected void prepareStatementForUpdate(PreparedStatement statement, Account object) throws DaoException {
         try {
             prepareStatementForInsert(statement, object);
             statement.setInt(12, object.getId());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
@@ -101,37 +101,37 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     }
 
     @Override
-    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws PersistException {
+    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws DaoException {
         try {
             statement.setInt(1, key);
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    protected void collectForeignData(Account object) throws PersistException {
+    protected void collectForeignData(Account object) throws DaoException {
         collectFriedns(object);
         collectPhones(object);
     }
 
-    private void collectPhones(Account object) throws PersistException {
+    private void collectPhones(Account object) throws DaoException {
         List<Phone> phones = new PhoneDao(connection).getPhonesByAccountId(object.getId());
         object.setPhones(phones);
     }
 
-    private void collectFriedns(Account object) throws PersistException {
+    private void collectFriedns(Account object) throws DaoException {
         List<Account> friends = getAllFriends(object);
         object.setFriendList(friends);
     }
 
     @Override
-    protected void fillForeignData(Account object, int id) throws PersistException {
+    protected void fillForeignData(Account object, int id) throws DaoException {
         fillFriends(object, id);
         fillPhones(object, id);
     }
 
-    private void fillFriends(Account object, int id) throws PersistException {
+    private void fillFriends(Account object, int id) throws DaoException {
         List<Account> friends = object.getFriendList();
         if (friends != null && friends.size() > 0) {
             List<Integer> friendsIdFromDb = getAllFriendsId(id);
@@ -145,7 +145,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                         statement.setInt(2, f.getId());
                         statement.executeUpdate();
                     } catch (SQLException e) {
-                        throw new PersistException(e);
+                        throw new DaoException(e);
                     }
                 }
             }
@@ -158,7 +158,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                         statement.setInt(2, friendId);
                         statement.executeUpdate();
                     } catch (SQLException e) {
-                        throw new PersistException(e);
+                        throw new DaoException(e);
                     }
                 }
             }
@@ -168,38 +168,40 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                 statement.setInt(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
-                throw new PersistException(e);
+                throw new DaoException(e);
             }
         }
     }
 
-    private void fillPhones(Account object, int id) throws PersistException {
+    private void fillPhones(Account object, int id) throws DaoException {
         List<Phone> phones = object.getPhones();
         List<Phone> phonesFromDb = new PhoneDao(connection).getPhonesByAccountId(id);
         GenericDao<Phone, Integer> phoneDao = new PhoneDao(connection);
-        if (phones != null && phones.size() > 0) {
-            for (Phone p : phones) {
-                p.setOwnerId(id);
-                if (phonesFromDb == null || !phonesFromDb.contains(p)) {
-                    phoneDao.create(p);
-                }
-            }
-
-            if (phonesFromDb != null) {
-                for (Phone ph : phonesFromDb) {
-                    if (!phones.contains(ph)) {
-                        phoneDao.delete(ph);
+        if (phones != null) {
+            if (phones.size() > 0) {
+                for (Phone p : phones) {
+                    p.setOwnerId(id);
+                    if (phonesFromDb == null || !phonesFromDb.contains(p)) {
+                        phoneDao.create(p);
                     }
                 }
-            }
-        } else {
-            for (Phone p : phonesFromDb) {
-                phoneDao.delete(p);
+
+                if (phonesFromDb != null) {
+                    for (Phone ph : phonesFromDb) {
+                        if (!phones.contains(ph)) {
+                            phoneDao.delete(ph);
+                        }
+                    }
+                }
+            } else {
+                for (Phone p : phonesFromDb) {
+                    phoneDao.delete(p);
+                }
             }
         }
     }
 
-    private List<Integer> getAllFriendsId(int id) throws PersistException {
+    private List<Integer> getAllFriendsId(int id) throws DaoException {
         List<Integer> result = new ArrayList<>();
         String sql = "SELECT * FROM Friends WHERE Account_id=" + id;
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -208,12 +210,12 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                 result.add(rs.getInt("Friend_id"));
             }
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return result;
     }
 
-    private List<Account> getAllFriends(Account object) throws PersistException {
+    private List<Account> getAllFriends(Account object) throws DaoException {
         List<Integer> friendsId = getAllFriendsId(object.getId());
         List<Account> result = new ArrayList<>(friendsId.size());
         for (Integer i : friendsId) {

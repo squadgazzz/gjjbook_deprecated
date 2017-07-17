@@ -1,7 +1,7 @@
 package com.gjjbook.dao.factory;
 
 import com.gjjbook.dao.GenericDao;
-import com.gjjbook.dao.PersistException;
+import com.gjjbook.dao.DaoException;
 
 import java.io.Closeable;
 
@@ -12,17 +12,17 @@ public interface DaoFactory<Context> extends Closeable {
 
     /**
      * @return connection to database
-     * @throws PersistException
+     * @throws DaoException
      */
-    Context getContext() throws PersistException;
+    Context getContext() throws DaoException;
 
     /**
      * @param context
      * @param dtoClass
      * @return object to manage persistent object state
-     * @throws PersistException
+     * @throws DaoException
      */
-    GenericDao getDao(Context context, Class dtoClass) throws PersistException;
+    GenericDao getDao(Context context, Class dtoClass) throws DaoException;
 
     interface DAOCreator<Context> {
         GenericDao create(Context context);

@@ -15,7 +15,6 @@ import org.junit.Test;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class AccountDaoTest {
     private GenericDao<Account, Integer> accountDao;
 
     @Before
-    public void setUp() throws Exception, PersistException {
+    public void setUp() throws Exception, DaoException {
         daoFactory = new DbDaoFactory();
         connection = daoFactory.getContext();
         RunScript runScript = new RunScript();
@@ -44,31 +43,31 @@ public class AccountDaoTest {
     }
 
     @Test
-    public void getContext() throws Exception, PersistException {
+    public void getContext() throws Exception, DaoException {
         Assert.assertNotNull(connection);
     }
 
     @Test
-    public void getDao() throws Exception, PersistException {
+    public void getDao() throws Exception, DaoException {
         Assert.assertNotNull(accountDao);
     }
 
     @Test
-    public void create() throws Exception, PersistException {
+    public void create() throws Exception, DaoException {
         Account newAcc = createTestAccount();
 
         Assert.assertNotNull(newAcc);
     }
 
     @Test
-    public void getByPK() throws Exception, PersistException {
+    public void getByPK() throws Exception, DaoException {
         Account newAcc = createTestAccount();
 
         Assert.assertEquals(newAcc, accountDao.getByPK(1));
     }
 
     @Test
-    public void update() throws Exception, PersistException {
+    public void update() throws Exception, DaoException {
         Account newAcc = createTestAccount();
         newAcc.setName("petr");
         accountDao.update(newAcc);
@@ -77,7 +76,7 @@ public class AccountDaoTest {
     }
 
     @Test
-    public void delete() throws Exception, PersistException {
+    public void delete() throws Exception, DaoException {
         Account newAcc = createTestAccount();
         accountDao.delete(newAcc);
 
@@ -85,7 +84,7 @@ public class AccountDaoTest {
     }
 
     @Test
-    public void getAll() throws Exception, PersistException {
+    public void getAll() throws Exception, DaoException {
         List<Account> list = new LinkedList<>();
         list.add(createTestAccount("1"));
         list.add(createTestAccount("2"));
@@ -93,7 +92,7 @@ public class AccountDaoTest {
         Assert.assertEquals(list, accountDao.getAll());
     }
 
-    private Account createTestAccount(String email) throws PersistException {
+    private Account createTestAccount(String email) throws DaoException {
         Phone phoneA = new Phone(PhoneType.HOME, 7, 4959998877L);
         Phone phoneB = new Phone(PhoneType.WORK, 7, 4951112233L);
         List<Phone> phones = new LinkedList<>();
@@ -109,7 +108,7 @@ public class AccountDaoTest {
         return accountDao.create(account);
     }
 
-    private Account createTestAccount() throws PersistException {
+    private Account createTestAccount() throws DaoException {
         return createTestAccount("email");
     }
 }

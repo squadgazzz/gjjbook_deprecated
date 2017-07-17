@@ -6,9 +6,7 @@ import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Group;
 import com.gjjbook.domain.Phone;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.*;
@@ -19,28 +17,19 @@ public class DbDaoFactory implements DaoFactory<Connection> {
     private String password;
     private String url;
     private int connectionsCount;
-    private final ConnectionPool connectionPool;
     private Map<Class, DAOCreator> creators;
-    private List<Connection> connections;
+    private final ConnectionPool connectionPool;
+    private final Queue<Connection> openedConnections = new LinkedList<>();
 
-    public DbDaoFactory() throws PersistException {
+    public DbDaoFactory() throws DaoException {
         setDbProperties();
         connectionPool = new ConnectionPool(driver, user, password, url, connectionsCount);
-        connections = new LinkedList<>();
         fillCreators();
     }
 
     @Override
     public void close() throws IOException {
-        if (connections != null && connections.size() > 0) {
-            try {
-                for (Connection c : connections) {
-                    connectionPool.release(c);
-                }
-            } catch (PersistException e) {
-                e.printStackTrace();
-            }
-        }
+        connectionPool.close();
     }
 
     private void fillCreators() {
@@ -65,7 +54,7 @@ public class DbDaoFactory implements DaoFactory<Connection> {
         });
     }
 
-    private void setDbProperties() throws PersistException {
+    private void setDbProperties() throws DaoException {
         try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("db.properties"))) {
             Properties properties = new Properties();
             properties.load(is);
@@ -80,17 +69,17 @@ public class DbDaoFactory implements DaoFactory<Connection> {
         }
     }
 
-    public Connection getContext() throws PersistException {
+    public Connection getContext() throws DaoException {
         Connection connection = connectionPool.getConnection();
-        connections.add(connection);
+        openedConnections.add(connection);
         return connection;
     }
 
     @Override
-    public GenericDao getDao(Connection connection, Class dtoClass) throws PersistException {
+    public GenericDao getDao(Connection connection, Class dtoClass) throws DaoException {
         DAOCreator creator = creators.get(dtoClass);
         if (creator == null) {
-            throw new PersistException("Dao object for " + dtoClass + " not found.");
+            throw new DaoException("Dao object for " + dtoClass + " not found.");
         }
         return creator.create(connection);
     }

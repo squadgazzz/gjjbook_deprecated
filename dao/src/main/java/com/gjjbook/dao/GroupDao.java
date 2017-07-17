@@ -37,7 +37,7 @@ public class GroupDao extends AbstractAutoIncrementIdDao<Group, Integer> {
     }
 
     @Override
-    protected List<Group> parseResultSet(ResultSet rs) throws PersistException {
+    protected List<Group> parseResultSet(ResultSet rs) throws DaoException {
         List<Group> result = new LinkedList<>();
         try {
             while (rs.next()) {
@@ -48,37 +48,37 @@ public class GroupDao extends AbstractAutoIncrementIdDao<Group, Integer> {
                 result.add(group);
             }
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return result;
     }
 
     @Override
-    protected void prepareStatementForInsert(PreparedStatement statement, Group object) throws PersistException {
+    protected void prepareStatementForInsert(PreparedStatement statement, Group object) throws DaoException {
         try {
             statement.setString(1, object.getName());
             statement.setString(2, object.getDescription());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws PersistException {
+    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws DaoException {
         try {
             statement.setInt(1, key);
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    protected void prepareStatementForUpdate(PreparedStatement statement, Group object) throws PersistException {
+    protected void prepareStatementForUpdate(PreparedStatement statement, Group object) throws DaoException {
         try {
             prepareStatementForInsert(statement, object);
             statement.setInt(3, object.getId());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 

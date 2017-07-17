@@ -38,7 +38,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
         return "DELETE FROM Phones" + getWhereByPKQuery();
     }
 
-    public List<Phone> getPhonesByAccountId(int id) throws PersistException {
+    public List<Phone> getPhonesByAccountId(int id) throws DaoException {
         List<Phone> list;
         String sql = getSelectQuery();
         sql += " WHERE Accounts_id = ?";
@@ -47,7 +47,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
             ResultSet rs = statement.executeQuery();
             list = parseResultSet(rs);
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
 
         if (list == null || list.size() == 0) {
@@ -58,7 +58,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
     }
 
     @Override
-    protected List<Phone> parseResultSet(ResultSet rs) throws PersistException {
+    protected List<Phone> parseResultSet(ResultSet rs) throws DaoException {
         List<Phone> result = new LinkedList<>();
         try {
             while (rs.next()) {
@@ -71,30 +71,30 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
                 result.add(phone);
             }
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return result;
     }
 
     @Override
-    protected void prepareStatementForInsert(PreparedStatement statement, Phone object) throws PersistException {
+    protected void prepareStatementForInsert(PreparedStatement statement, Phone object) throws DaoException {
         try {
             statement.setInt(1, object.getOwnerId());
             statement.setString(2, object.getType().name());
             statement.setInt(3, object.getCountryCode());
             statement.setLong(4, object.getNumber());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     @Override
-    protected void prepareStatementForUpdate(PreparedStatement statement, Phone object) throws PersistException {
+    protected void prepareStatementForUpdate(PreparedStatement statement, Phone object) throws DaoException {
         try {
             prepareStatementForInsert(statement, object);
             statement.setInt(5, object.getId());
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
@@ -104,11 +104,11 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
     }
 
     @Override
-    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws PersistException {
+    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws DaoException {
         try {
             statement.setInt(1, key);
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 

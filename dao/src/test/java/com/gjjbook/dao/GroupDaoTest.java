@@ -20,7 +20,7 @@ public class GroupDaoTest {
     private GenericDao<Group, Integer> groupDao;
 
     @Before
-    public void setUp() throws Exception, PersistException {
+    public void setUp() throws Exception, DaoException {
         daoFactory = new DbDaoFactory();
         connection = daoFactory.getContext();
         RunScript runScript = new RunScript();
@@ -35,31 +35,31 @@ public class GroupDaoTest {
     }
 
     @Test
-    public void getContext() throws Exception, PersistException {
+    public void getContext() throws Exception, DaoException {
         Assert.assertNotNull(connection);
     }
 
     @Test
-    public void getDao() throws Exception, PersistException {
+    public void getDao() throws Exception, DaoException {
         Assert.assertNotNull(groupDao);
     }
 
     @Test
-    public void create() throws Exception, PersistException {
+    public void create() throws Exception, DaoException {
         Group newGroup = createTestGroup();
 
         Assert.assertNotNull(newGroup);
     }
 
     @Test
-    public void getByPK() throws Exception, PersistException {
+    public void getByPK() throws Exception, DaoException {
         Group newGroup = createTestGroup();
 
         Assert.assertEquals(newGroup, groupDao.getByPK(1));
     }
 
     @Test
-    public void update() throws Exception, PersistException {
+    public void update() throws Exception, DaoException {
         Group newGroup = createTestGroup();
         newGroup.setName("petr");
         groupDao.update(newGroup);
@@ -68,7 +68,7 @@ public class GroupDaoTest {
     }
 
     @Test
-    public void delete() throws Exception, PersistException {
+    public void delete() throws Exception, DaoException {
         Group newGroup = createTestGroup();
         groupDao.delete(newGroup);
 
@@ -76,7 +76,7 @@ public class GroupDaoTest {
     }
 
     @Test
-    public void getAll() throws Exception, PersistException {
+    public void getAll() throws Exception, DaoException {
         List<Group> list = new LinkedList<>();
         list.add(createTestGroup("1"));
         list.add(createTestGroup("2"));
@@ -84,12 +84,12 @@ public class GroupDaoTest {
         Assert.assertEquals(list, groupDao.getAll());
     }
 
-    private Group createTestGroup(String name) throws PersistException {
+    private Group createTestGroup(String name) throws DaoException {
         Group group = new Group(name, "desc", null);
         return groupDao.create(group);
     }
 
-    private Group createTestGroup() throws PersistException {
+    private Group createTestGroup() throws DaoException {
         return createTestGroup("name");
     }
 }

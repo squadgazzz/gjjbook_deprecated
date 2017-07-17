@@ -11,13 +11,13 @@ import java.util.List;
 
 public interface GenericDao<T, PK> {
 
-    T create(T object) throws PersistException;
+    T create(T object) throws DaoException;
 
-    T getByPK(PK key) throws PersistException;
+    T getByPK(PK key) throws DaoException;
 
-    void update(T object) throws PersistException;
+    void update(T object) throws DaoException;
 
-    void delete(T object) throws PersistException;
+    void delete(T object) throws DaoException;
 
-    List<T> getAll() throws PersistException;
+    List<T> getAll() throws DaoException;
 }

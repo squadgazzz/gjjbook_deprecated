@@ -12,7 +12,7 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
     }
 
     @Override
-    public T create(T object) throws PersistException {
+    public T create(T object) throws DaoException {
         if (object == null) {
             return null;
         }
@@ -25,10 +25,10 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
             int count = statement.executeUpdate();
             generatedId = getGeneratedId(statement);
             if (count != 1) {
-                throw new PersistException("On create modify more then 1 record: " + count);
+                throw new DaoException("On create modify more then 1 record: " + count);
             }
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
 
         fillForeignData(object, generatedId);
@@ -39,23 +39,23 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
             ResultSet rs = statement.executeQuery();
             List<T> list = parseResultSet(rs);
             if (list == null || list.size() != 1) {
-                throw new PersistException("Exception on findByPK new create data. List size=" + list.size());
+                throw new DaoException("Exception on findByPK new create data. List size=" + list.size());
             }
             persistInstance = list.iterator().next();
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
 
         return persistInstance;
     }
 
-    protected PK getGeneratedId(PreparedStatement statement) throws PersistException {
+    protected PK getGeneratedId(PreparedStatement statement) throws DaoException {
         try (ResultSet rs = statement.getGeneratedKeys()) {
             if (rs.next()) {
-                return (PK) rs.getObject(1);
+                return (PK) new Integer(rs.getInt(1));
             }
         } catch (SQLException e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return null;
     }

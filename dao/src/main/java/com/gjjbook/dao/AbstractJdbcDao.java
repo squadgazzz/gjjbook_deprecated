@@ -23,16 +23,16 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
 
     protected abstract String getDeleteQuery();
 
-    protected abstract List<T> parseResultSet(ResultSet rs) throws PersistException;
+    protected abstract List<T> parseResultSet(ResultSet rs) throws DaoException;
 
-    protected abstract void prepareStatementForInsert(PreparedStatement statement, T object) throws PersistException;
+    protected abstract void prepareStatementForInsert(PreparedStatement statement, T object) throws DaoException;
 
-    protected abstract void prepareStatementForUpdate(PreparedStatement statement, T object) throws PersistException;
+    protected abstract void prepareStatementForUpdate(PreparedStatement statement, T object) throws DaoException;
 
     protected abstract void prepareStatementForDelete(PreparedStatement statement, T object) throws SQLException;
 
     @Override
-    public T getByPK(PK key) throws PersistException {
+    public T getByPK(PK key) throws DaoException {
         List<T> list;
         String sql = getSelectQuery();
         sql += getWhereByPKQuery();
@@ -41,14 +41,14 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
             ResultSet rs = statement.executeQuery();
             list = parseResultSet(rs);
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
 
         if (list == null || list.size() == 0) {
             return null;
         }
         if (list.size() > 1) {
-            throw new PersistException("Received more than one record.");
+            throw new DaoException("Received more than one record.");
         }
 
         T result = list.iterator().next();
@@ -56,23 +56,23 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
         return result;
     }
 
-    protected abstract void prepareStatementForGet(PreparedStatement statement, PK key) throws PersistException;
+    protected abstract void prepareStatementForGet(PreparedStatement statement, PK key) throws DaoException;
 
     @Override
-    public List<T> getAll() throws PersistException {
+    public List<T> getAll() throws DaoException {
         List<T> list;
         String sql = getSelectQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             list = parseResultSet(rs);
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
         return list;
     }
 
     @Override
-    public void update(T object) throws PersistException {
+    public void update(T object) throws DaoException {
         if (object == null) {
             return;
         }
@@ -82,17 +82,17 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
             prepareStatementForUpdate(statement, object);
             int count = statement.executeUpdate();
             if (count != 1) {
-                throw new PersistException("On update modify more then 1 record: " + count);
+                throw new DaoException("On update modify more then 1 record: " + count);
             }
             fillForeignData(object, (Integer) object.getPK());
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
 
     }
 
     @Override
-    public void delete(T object) throws PersistException {
+    public void delete(T object) throws DaoException {
         if (object == null) {
             return;
         }
@@ -102,16 +102,16 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
             prepareStatementForDelete(statement, object);
             int count = statement.executeUpdate();
             if (count != 1) {
-                throw new PersistException("On delete modify more then 1 record: " + count);
+                throw new DaoException("On delete modify more then 1 record: " + count);
             }
         } catch (Exception e) {
-            throw new PersistException(e);
+            throw new DaoException(e);
         }
     }
 
     protected abstract String getWhereByPKQuery();
 
-    protected abstract void collectForeignData(T object) throws PersistException;
+    protected abstract void collectForeignData(T object) throws DaoException;
 
-    protected abstract void fillForeignData(T object, int generatedId) throws PersistException;
+    protected abstract void fillForeignData(T object, int generatedId) throws DaoException;
 }
