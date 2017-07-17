@@ -167,6 +167,10 @@ public class Account implements Identified<Integer> {
 
         Account account = (Account) o;
 
+        if (email == null && account.email == null) {
+            return true;
+        }
+
         return email.equals(account.email);
     }
 
