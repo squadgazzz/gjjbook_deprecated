@@ -23,13 +23,13 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
 
     @Override
     protected String getCreateQuery() {
-        return "INSERT INTO Phones (Accounts_id, type, countrycode, number) " +
-                "VALUES (?, ?, ?, ?)";
+        return "INSERT INTO Phones (Accounts_id, type, number) " +
+                "VALUES (?, ?, ?)";
     }
 
     @Override
     protected String getUpdateQuery() {
-        return "UPDATE Phones SET Accounts_id= ?, type= ?, countrycode= ?, number= ? " +
+        return "UPDATE Phones SET Accounts_id= ?, type= ?, number= ? " +
                 getWhereByPKQuery();
     }
 
@@ -65,8 +65,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
                 PersistPhone phone = new PersistPhone();
                 phone.setId(rs.getInt("id"));
                 phone.setOwnerId(rs.getInt("Accounts_id"));
-                phone.setCountryCode(rs.getInt("countrycode"));
-                phone.setNumber(rs.getLong("number"));
+                phone.setNumber(rs.getString("number"));
                 phone.setType(PhoneType.valueOf(rs.getString("type")));
                 result.add(phone);
             }
@@ -81,8 +80,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
         try {
             statement.setInt(1, object.getOwnerId());
             statement.setString(2, object.getType().name());
-            statement.setInt(3, object.getCountryCode());
-            statement.setLong(4, object.getNumber());
+            statement.setString(3, object.getNumber());
         } catch (SQLException e) {
             throw new DaoException(e);
         }

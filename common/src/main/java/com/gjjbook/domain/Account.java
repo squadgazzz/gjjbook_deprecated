@@ -14,7 +14,7 @@ public class Account implements Identified<Integer> {
     private String homeAddress;
     private String workAddress;
     private String email;
-    private int icq;
+    private String icq;
     private String skype;
     private String additionalInfo;
     private List<Account> friendList;
@@ -23,7 +23,7 @@ public class Account implements Identified<Integer> {
     public Account() {
     }
 
-    public Account(String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, int icq, String skype, String additionalInfo, List<Account> friendList, List<Group> groupList) {
+    public Account(String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, List<Group> groupList) {
         this.name = name;
         this.middleName = middleName;
         this.surName = surName;
@@ -120,11 +120,11 @@ public class Account implements Identified<Integer> {
         this.email = email;
     }
 
-    public int getIcq() {
+    public String getIcq() {
         return icq;
     }
 
-    public void setIcq(int icq) {
+    public void setIcq(String icq) {
         this.icq = icq;
     }
 

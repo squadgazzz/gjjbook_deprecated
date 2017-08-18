@@ -93,8 +93,8 @@ public class AccountDaoTest {
     }
 
     private Account createTestAccount(String email) throws DaoException {
-        Phone phoneA = new Phone(PhoneType.HOME, 7, 4959998877L);
-        Phone phoneB = new Phone(PhoneType.WORK, 7, 4951112233L);
+        Phone phoneA = new Phone(PhoneType.HOME, "4959998877");
+        Phone phoneB = new Phone(PhoneType.WORK, "4951112233");
         List<Phone> phones = new LinkedList<>();
         phones.add(phoneA);
         phones.add(phoneB);
@@ -102,7 +102,7 @@ public class AccountDaoTest {
         Account account = new Account("ivan", null, "ivanov",
                 Sex.MALE, LocalDate.of(2000, 10, 20),
                 phones, "home", "work",
-                email, 7894, "skype",
+                email, "7894", "skype",
                 null, null, null);
 
         return accountDao.create(account);

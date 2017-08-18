@@ -4,6 +4,7 @@ import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.Sex;
 
+import javax.sql.rowset.serial.SerialBlob;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -54,7 +55,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                 account.setHomeAddress(rs.getString("homeAddress"));
                 account.setWorkAddress(rs.getString("workAddress"));
                 account.setEmail(rs.getString("email"));
-                account.setIcq(rs.getInt("icq"));
+                account.setIcq(rs.getString("icq"));
                 account.setSkype(rs.getString("skype"));
                 account.setAdditionalInfo(rs.getString("additionalInfo"));
                 collectForeignData(account);
@@ -77,7 +78,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
             statement.setString(6, object.getHomeAddress());
             statement.setString(7, object.getWorkAddress());
             statement.setString(8, object.getEmail());
-            statement.setInt(9, object.getIcq());
+            statement.setString(9, object.getIcq());
             statement.setString(10, object.getSkype());
             statement.setString(11, object.getAdditionalInfo());
         } catch (SQLException e) {
@@ -175,8 +176,8 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     private void fillPhones(Account object, int id) throws DaoException {
         List<Phone> phones = object.getPhones();
-        List<Phone> phonesFromDb = new PhoneDao(connection).getPhonesByAccountId(id);
-        GenericDao<Phone, Integer> phoneDao = new PhoneDao(connection);
+        PhoneDao phoneDao = new PhoneDao(connection);
+        List<Phone> phonesFromDb = phoneDao.getPhonesByAccountId(id);
         if (phones != null) {
             if (phones.size() > 0) {
                 for (Phone p : phones) {
@@ -221,6 +222,155 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
         for (Integer i : friendsId) {
             result.add(getByPK(i));
         }
+        return result;
+    }
+
+    public List<Account> findByPartName(String findField) throws DaoException {
+        List<Account> result;
+        String part = "'%" + findField + "%'";
+        String sql = "SELECT * FROM Accounts WHERE name LIKE " + part +
+                " OR middlename LIKE " + part +
+                " OR surname LIKE " + part;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            result = parseResultSet(statement.executeQuery());
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+        return result;
+    }
+
+    public void setPassword(Account account, String password) throws DaoException {
+        String sql;
+        if (getPassword(account) == null) {
+            sql = "INSERT INTO Email_password (password, Account_email) VALUES(?,?)";
+        } else {
+            sql = "UPDATE Email_password SET password= ? WHERE Account_email= ?";
+        }
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, password);
+            statement.setString(2, account.getEmail());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public String getPassword(Account account) throws DaoException {
+        String sql = "SELECT password FROM Email_password WHERE Account_email= ? ";
+        String result = null;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, account.getEmail());
+            ResultSet rs = statement.executeQuery();
+            if (rs == null) {
+                return null;
+            }
+
+            if (rs.next()) {
+                result = rs.getString("password");
+            }
+
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
+        return result;
+    }
+
+    public boolean isPasswordMatch(String email, String password) throws DaoException {
+        String sql = "SELECT COUNT(*) as MATCHES FROM Email_password WHERE Account_email=? AND password=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            statement.setString(2, password);
+            ResultSet rs = statement.executeQuery();
+
+            return rs.next() && rs.getInt("MATCHES") != 0;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public Account getByEmail(String email) throws DaoException {
+        List<Account> result;
+        String sql = "SELECT * FROM Accounts WHERE email=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, email);
+            ResultSet rs = statement.executeQuery();
+            result = parseResultSet(rs);
+            if (result.size() > 1) {
+                throw new DaoException("Found more than 1 account with email: " + email);
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+        return result.get(0);
+    }
+
+    public void setAvatar(Account account, byte[] image) throws DaoException {
+        String sql;
+        if (isAccountAvatar(account)) {
+            sql = "UPDATE Account_avatar SET Avatar=? WHERE Account_id=?";
+        } else {
+            sql = "INSERT INTO Account_avatar (Avatar, Account_id) VALUES(?,?)";
+        }
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            Blob blob = new SerialBlob(image);
+            statement.setBlob(1, blob);
+            statement.setInt(2, account.getId());
+            statement.executeUpdate();
+            blob.free();
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    private boolean isAccountAvatar(Account account) throws DaoException {
+        String sql = "SELECT COUNT(*) AS MATCHES FROM Account_avatar WHERE Account_id=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, account.getId());
+            ResultSet rs = statement.executeQuery();
+
+            return rs.next() && rs.getInt("MATCHES") != 0;
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+    }
+
+    public byte[] getAvatar(Account account) throws DaoException {
+        byte[] result;
+        String sql = "SELECT avatar FROM Account_avatar WHERE Account_id=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, account.getId());
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                Blob blob = rs.getBlob("avatar");
+                result = blob.getBytes(1, (int) blob.length());
+                blob.free();
+            } else {
+                result = getDefaultAvatar(1);
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
+        return result;
+    }
+
+    private byte[] getDefaultAvatar(int id) throws DaoException {
+        byte[] result = null;
+        String sql = "SELECT avatar FROM Default_avatars WHERE id=?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                Blob blob = rs.getBlob("avatar");
+                result = blob.getBytes(1, (int) blob.length());
+                blob.free();
+            }
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
         return result;
     }
 

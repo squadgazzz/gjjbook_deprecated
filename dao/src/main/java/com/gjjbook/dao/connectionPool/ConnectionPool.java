@@ -58,6 +58,10 @@ public class ConnectionPool implements Closeable {
     }
 
     public synchronized void recycle(Connection connection) throws DaoException {
+        if (busyConnections.contains(connection)) {
+            busyConnections.remove(connection);
+        }
+
         if (!freeConnections.offer(connection)) {
             try {
                 if (!connection.isClosed()) {

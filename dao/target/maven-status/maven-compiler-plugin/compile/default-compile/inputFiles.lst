@@ -1,0 +1,10 @@
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\factory\DbDaoFactory.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\AbstractJdbcDao.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\AccountDao.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\DaoException.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\factory\DaoFactory.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\GroupDao.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\GenericDao.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\AbstractAutoIncrementIdDao.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\connectionPool\ConnectionPool.java
+C:\dev\projects\getjavajob\gjjbook\dao\src\main\java\com\gjjbook\dao\PhoneDao.java

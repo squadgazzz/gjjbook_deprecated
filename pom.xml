@@ -8,6 +8,10 @@
         <junit.version>4.12</junit.version>
         <mysql.version>5.1.42</mysql.version>
         <h2.version>1.4.196</h2.version>
+        <javax.servlet.version>3.1.0</javax.servlet.version>
+        <jstl.version>1.2</jstl.version>
+        <bootstrap.version>3.3.7</bootstrap.version>
+        <jquery.version>3.2.1</jquery.version>
     </properties>
 
     <groupId>com.gjjbook</groupId>
@@ -15,9 +19,10 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>common</module>
         <module>dao</module>
+        <module>common</module>
         <module>service</module>
+        <module>webapp</module>
     </modules>
     <description>GJJBook - social network for communication between java-developers</description>
 
@@ -41,5 +46,7 @@
                 </configuration>
             </plugin>
         </plugins>
+
     </build>
+
 </project>

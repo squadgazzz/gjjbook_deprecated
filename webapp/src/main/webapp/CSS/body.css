@@ -1,0 +1,86 @@
+body {
+    background-color: #ECF0F1;
+}
+
+.well {
+    border-radius: 2px;
+    border-color: rgba(52, 73, 94, 0.1);
+    box-shadow: 1px 1px 0 rgba(52, 73, 94, 0.1);
+    background-color: white;
+}
+
+.list-group {
+    float: right;
+    width: 100%;
+    margin-top: 10px;
+    list-style-type: none;
+}
+
+.list-group .list-group-item {
+    background-color: #ECF0F1;
+    padding: 5px 5px 5px 15px;
+    border-radius: 0;
+    border: none;
+}
+
+.list-group .list-group-item:hover {
+    background-color: #DADFE1;
+}
+
+.list-group .list-group-item a, a:hover, .glyphicon {
+    color: rgba(52, 73, 94, 0.8);
+    text-decoration: none;
+}
+
+.btn-block {
+    border-radius: 0;
+    color: rgba(52, 73, 94, 0.8);
+    background-color: #ECF0F1;
+}
+
+.btn-block:hover {
+    color: rgba(52, 73, 94, 0.8);
+    background-color: #f1f5f6;
+}
+
+.btn-block:focus, .btn-block:active {
+    box-shadow: none;
+    color: rgba(52, 73, 94, 0.8);
+    border-radius: 0;
+    background-color: #ECF0F1;
+}
+
+.btn-block:active {
+    position: relative;
+    top: 1px;
+}
+
+.btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus {
+    outline: 0;
+}
+
+.row-top {
+    margin-top: 10px;
+}
+
+
+/*spaces between rows*/
+.row .well {
+    margin-bottom: 10px;
+}
+
+/*spaces between columns*/
+.row .col-left {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+.row .col-right {
+    padding-left: 5px;
+    padding-right: 0;
+}
+
+.row .col-xs-2 {
+    padding-left: 0;
+    padding-right: 0;
+}

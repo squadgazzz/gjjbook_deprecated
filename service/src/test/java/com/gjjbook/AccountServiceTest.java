@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class) // DONE 16.07.2017: run with mockitoJunitRunner
+@RunWith(MockitoJUnitRunner.class)
 public class AccountServiceTest {
 
     @Mock

@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Identified;
 
 import java.sql.Connection;

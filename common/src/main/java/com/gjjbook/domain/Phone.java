@@ -4,15 +4,13 @@ public class Phone implements Identified<Integer> {
     private int id;
     private int ownerId;
     private PhoneType type;
-    private int countryCode;
-    private long number;
+    private String number;
 
     public Phone() {
     }
 
-    public Phone(PhoneType type, int countryCode, long number) {
+    public Phone(PhoneType type, String number) {
         this.type = type;
-        this.countryCode = countryCode;
         this.number = number;
     }
 
@@ -40,19 +38,11 @@ public class Phone implements Identified<Integer> {
         this.type = type;
     }
 
-    public int getCountryCode() {
-        return countryCode;
-    }
-
-    public void setCountryCode(int countryCode) {
-        this.countryCode = countryCode;
-    }
-
-    public long getNumber() {
+    public String getNumber() {
         return number;
     }
 
-    public void setNumber(long number) {
+    public void setNumber(String number) {
         this.number = number;
     }
 
@@ -63,15 +53,12 @@ public class Phone implements Identified<Integer> {
 
         Phone phone = (Phone) o;
 
-        if (countryCode != phone.countryCode) return false;
-        return number == phone.number;
+        return number.equals(phone.number);
     }
 
     @Override
     public int hashCode() {
-        int result = countryCode;
-        result = 31 * result + (int) (number ^ (number >>> 32));
-        return result;
+        return number.hashCode();
     }
 
     @Override
