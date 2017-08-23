@@ -21,7 +21,6 @@ public class UpdateAvatar extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // done: 10.08.2017 починить обновление картинки и с пустой посмотреть
         Account account = (Account) req.getSession().getAttribute("loggedUser");
         Part filePart = req.getPart("avatar");
         if (filePart != null) {

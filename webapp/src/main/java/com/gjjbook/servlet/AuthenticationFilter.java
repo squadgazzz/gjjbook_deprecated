@@ -24,6 +24,10 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) servletRequest;
         HttpServletResponse res = (HttpServletResponse) servletResponse;
         String path = req.getRequestURI();
+        String params = req.getQueryString();
+        if (params != null) {
+            path += "?" + params;
+        }
         Cookie[] cookies = req.getCookies();
 
         if (!path.contains("/login") && !path.contains("/IMG") && !path.contains("/CSS") &&
@@ -38,7 +42,7 @@ public class AuthenticationFilter implements Filter {
                 for (Cookie c : cookies) {
                     String cookieName = c.getName();
 
-                    if ("email".equals(cookieName)) { // done: 10.08.2017 разобраться с левыми куками(напр. blabla)
+                    if ("email".equals(cookieName)) {
                         email = c.getValue();
                     } else if ("password".equals(cookieName)) {
                         password = c.getValue();
@@ -46,7 +50,7 @@ public class AuthenticationFilter implements Filter {
                 }
                 if (email != null && password != null) {
                     HttpSession session = req.getSession();
-                    req.setAttribute("email", email); // TODO: 10.08.2017 при удалении jsession нужно оставаться на той же странице аккаунта
+                    req.setAttribute("email", email); // done: 10.08.2017 после завершения сессии нужно оставаться на той же странице, не по полному пути переходил..
                     req.setAttribute("password", password);
                     req.setAttribute("path", path);
                     if (session.getAttribute("accountService") == null) {

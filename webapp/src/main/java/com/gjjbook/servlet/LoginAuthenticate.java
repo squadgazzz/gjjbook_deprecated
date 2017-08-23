@@ -21,7 +21,7 @@ public class LoginAuthenticate extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         RequestDispatcher rq = getServletContext().getRequestDispatcher("/login");
-        String email = (String) req.getAttribute("email"); // done: 11.08.2017 в каком случае будут мыло и пасс в атрибутах
+        String email = (String) req.getAttribute("email");
         String password = (String) req.getAttribute("password");
         if (email == null || password == null) {
             email = req.getParameter("email");
@@ -33,7 +33,7 @@ public class LoginAuthenticate extends HttpServlet {
         } else {
             HttpSession session = req.getSession();
             try {
-                AccountService service = (AccountService) session.getAttribute("accountService"); // done: 11.08.2017 не создавать каждый раз сервис
+                AccountService service = (AccountService) session.getAttribute("accountService");
                 if (service == null) {
                     service = new AccountService();
                     session.setAttribute("accountService", service);
@@ -59,13 +59,4 @@ public class LoginAuthenticate extends HttpServlet {
             }
         }
     }
-
-    /*private boolean isRememberMe(HttpServletRequest req) {
-        String[] checked = req.getParameterValues("rememberMe");
-        if (checked != null && checked.length > 0 && "remember".equals(checked[0])) { // done: 11.08.2017 упростить, проверять есть ли параметр
-            return true;
-        } else {
-            return false;
-        }
-    }*/
 }
