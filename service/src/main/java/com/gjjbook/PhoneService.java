@@ -2,11 +2,9 @@ package com.gjjbook;
 
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.GenericDao;
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.dao.factory.DaoFactory;
 import com.gjjbook.domain.Phone;
-
-import java.sql.Connection;
-import java.util.List;
 
 public class PhoneService extends AbstractService<Phone, Integer> {
 
@@ -14,7 +12,7 @@ public class PhoneService extends AbstractService<Phone, Integer> {
         super();
     }
 
-    public PhoneService(DaoFactory<Connection> factory, GenericDao<Phone, Integer> daoObject) {
+    public PhoneService(DaoFactory<ConnectionPool> factory, GenericDao<Phone, Integer> daoObject) {
         super(factory, daoObject);
     }
 

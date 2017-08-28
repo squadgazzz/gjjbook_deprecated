@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Identified;
 
 import java.sql.*;
@@ -7,8 +8,8 @@ import java.util.List;
 
 public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK extends Integer> extends AbstractJdbcDao<T, PK> {
 
-    public AbstractAutoIncrementIdDao(Connection connection) {
-        super(connection);
+    public AbstractAutoIncrementIdDao(ConnectionPool connectionPool) {
+        super(connectionPool);
     }
 
     @Override
@@ -20,21 +21,20 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
         T persistInstance;
         String sql = getCreateQuery();
         PK generatedId;
-        try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        Connection connection = connectionPool.getConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             prepareStatementForInsert(statement, object);
             int count = statement.executeUpdate();
             generatedId = getGeneratedId(statement);
             if (count != 1) {
                 throw new DaoException("On create modify more then 1 record: " + count);
             }
-        } catch (Exception e) {
-            throw new DaoException(e);
-        }
 
-        fillForeignData(object, generatedId);
+            fillForeignData(object, generatedId);
 
-        sql = getSelectQuery() + getWhereByPKQuery();
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            sql = getSelectQuery() + getWhereByPKQuery();
+            statement = connection.prepareStatement(sql);
             prepareStatementForGet(statement, generatedId);
             ResultSet rs = statement.executeQuery();
             List<T> list = parseResultSet(rs);
@@ -42,6 +42,8 @@ public abstract class AbstractAutoIncrementIdDao<T extends Identified<PK>, PK ex
                 throw new DaoException("Exception on findByPK new create data. List size=" + list.size());
             }
             persistInstance = list.iterator().next();
+
+            statement.close();
         } catch (Exception e) {
             throw new DaoException(e);
         }

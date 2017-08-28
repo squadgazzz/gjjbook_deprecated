@@ -3,6 +3,7 @@ package com.gjjbook;
 import com.gjjbook.dao.AccountDao;
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.GenericDao;
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.dao.factory.DaoFactory;
 import com.gjjbook.domain.Account;
 
@@ -25,7 +26,7 @@ public class AccountService extends AbstractService<Account, Integer> {
         super();
     }
 
-    public AccountService(DaoFactory<Connection> factory, GenericDao<Account, Integer> daoObject) {
+    public AccountService(DaoFactory<ConnectionPool> factory, GenericDao<Account, Integer> daoObject) {
         super(factory, daoObject);
     }
 
@@ -82,59 +83,207 @@ public class AccountService extends AbstractService<Account, Integer> {
         return account.getFriendList();
     }
 
-    public List<Account> findByPartName(String findField) throws DaoException {
-        return ((AccountDao) daoObject).findByPartName(findField);
+    public List<Account> findByPartName(String findField) throws ServiceException {
+        if (findField == null) {
+            return null;
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
+        try {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            List<Account> result = ((AccountDao) daoObject).findByPartName(findField);
+            connection.commit();
+            return result;
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
+            throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
+        }
     }
 
     public void setPassword(Account account, String password) throws ServiceException {
+        if (account == null || password == null) {
+            return;
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
         try {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
             ((AccountDao) daoObject).setPassword(account, password);
-        } catch (DaoException e) {
+            connection.commit();
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
             throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
         }
     }
 
     public boolean isPasswordMatch(String email, String password) throws ServiceException {
+        if (email == null || password == null) {
+            throw new ServiceException("Email or password is null");
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
         try {
-            return ((AccountDao) daoObject).isPasswordMatch(email, password);
-        } catch (DaoException e) {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            boolean result = ((AccountDao) daoObject).isPasswordMatch(email, password);
+            connection.commit();
+            return result;
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
             throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
         }
     }
 
     public Account getByEmail(String email) throws ServiceException {
+        if (email == null) {
+            return null;
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
         try {
-            return ((AccountDao) daoObject).getByEmail(email);
-        } catch (DaoException e) {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            Account result = ((AccountDao) daoObject).getByEmail(email);
+            connection.commit();
+            return result;
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
             throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
         }
     }
 
-    public void getPassword(Account account) throws ServiceException {
+    public String getPassword(Account account) throws ServiceException {
+        if (account == null) {
+            return null;
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
         try {
-            ((AccountDao) daoObject).getPassword(account);
-        } catch (DaoException e) {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            String result = ((AccountDao) daoObject).getPassword(account);
+            connection.commit();
+            return result;
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
             throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
         }
     }
 
+    public void setAvatar(Account account, byte[] image) throws ServiceException {
+        if (account == null) {
+            return;
+        }
 
-    public void setAvatar(Account account, byte[] image) throws DaoException {
-        ((AccountDao) daoObject).setAvatar(account, image);
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
+        try {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            ((AccountDao) daoObject).setAvatar(account, image);
+            connection.commit();
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
+            throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
+        }
     }
 
-    public byte[] getAvatar(Account account) throws DaoException {
-        return ((AccountDao) daoObject).getAvatar(account);
+    public byte[] getAvatar(Account account) throws ServiceException {
+        if (account == null) {
+            return null;
+        }
+
+        ConnectionPool connectionPool = null;
+        Connection connection = null;
+        try {
+            connectionPool = factory.getContext();
+            connection = connectionPool.getConnection();
+            connection.setAutoCommit(false);
+            byte[] result = ((AccountDao) daoObject).getAvatar(account);
+            connection.commit();
+            return result;
+        } catch (DaoException | SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ee) {
+                    throw new ServiceException(e);
+                }
+            }
+            throw new ServiceException(e);
+        } finally {
+            renewConnection(connectionPool, connection);
+        }
     }
 
-    public String getEncodedAvatar(Account account) throws DaoException {
+    public String getEncodedAvatar(Account account) throws ServiceException {
         return Base64.getEncoder().encodeToString(getAvatar(account));
     }
 
-
     public static void main(String[] args) throws ServiceException, DaoException, IOException {
         AccountService service = new AccountService();
-        Connection connection = service.factory.getContext();
+        Connection connection = service.factory.getContext().getConnection();
 
         Path path = Paths.get("C:\\Users\\IZhavoronkov\\Downloads\\if_unknown2_628287.png");
         byte[] image = Files.readAllBytes(path);

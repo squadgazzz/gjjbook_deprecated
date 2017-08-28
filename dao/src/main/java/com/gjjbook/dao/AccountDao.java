@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.Sex;
@@ -12,8 +13,8 @@ import java.util.List;
 
 public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
-    public AccountDao(Connection connection) {
-        super(connection);
+    public AccountDao(ConnectionPool connectionPool) {
+        super(connectionPool);
     }
 
     @Override
@@ -112,16 +113,16 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     @Override
     protected void collectForeignData(Account object) throws DaoException {
-        collectFriedns(object);
+        collectFriends(object);
         collectPhones(object);
     }
 
     private void collectPhones(Account object) throws DaoException {
-        List<Phone> phones = new PhoneDao(connection).getPhonesByAccountId(object.getId());
+        List<Phone> phones = new PhoneDao(connectionPool).getPhonesByAccountId(object.getId());
         object.setPhones(phones);
     }
 
-    private void collectFriedns(Account object) throws DaoException {
+    private void collectFriends(Account object) throws DaoException {
         List<Account> friends = getAllFriends(object);
         object.setFriendList(friends);
     }
@@ -134,6 +135,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     private void fillFriends(Account object, int id) throws DaoException {
         List<Account> friends = object.getFriendList();
+        Connection conn = connectionPool.getConnection();
         if (friends != null && friends.size() > 0) {
             List<Integer> friendsIdFromDb = getAllFriendsId(id);
             List<Integer> objectFriendsId = new ArrayList<>();
@@ -141,7 +143,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
                 objectFriendsId.add(f.getId());
                 if (!friendsIdFromDb.contains(f.getId())) {
                     String sql = "INSERT INTO Friends Account_id= ?, Friend_id= ?";
-                    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    try (PreparedStatement statement = conn.prepareStatement(sql)) {
                         statement.setInt(1, id);
                         statement.setInt(2, f.getId());
                         statement.executeUpdate();
@@ -154,7 +156,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
             for (Integer friendId : friendsIdFromDb) {
                 if (!objectFriendsId.contains(friendId)) {
                     String sql = "DELETE FROM Friends WHERE Account_id= ?, Friend_id= ?";
-                    try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    try (PreparedStatement statement = conn.prepareStatement(sql)) {
                         statement.setInt(1, id);
                         statement.setInt(2, friendId);
                         statement.executeUpdate();
@@ -165,7 +167,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
             }
         } else {
             String sql = "DELETE FROM Friends WHERE Account_id= ?";
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 statement.setInt(1, id);
                 statement.executeUpdate();
             } catch (SQLException e) {
@@ -176,7 +178,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     private void fillPhones(Account object, int id) throws DaoException {
         List<Phone> phones = object.getPhones();
-        PhoneDao phoneDao = new PhoneDao(connection);
+        PhoneDao phoneDao = new PhoneDao(connectionPool);
         List<Phone> phonesFromDb = phoneDao.getPhonesByAccountId(id);
         if (phones != null) {
             if (phones.size() > 0) {
@@ -205,6 +207,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     private List<Integer> getAllFriendsId(int id) throws DaoException {
         List<Integer> result = new ArrayList<>();
         String sql = "SELECT * FROM Friends WHERE Account_id=" + id;
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
@@ -213,6 +216,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+
         return result;
     }
 
@@ -227,6 +231,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     public List<Account> findByPartName(String findField) throws DaoException {
         List<Account> result;
+        Connection connection = connectionPool.getConnection();
         String part = "'%" + findField + "%'";
         String sql = "SELECT * FROM Accounts WHERE name LIKE " + part +
                 " OR middlename LIKE " + part +
@@ -236,6 +241,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
         } catch (SQLException e) {
             throw new DaoException(e);
         }
+
         return result;
     }
 
@@ -247,6 +253,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
             sql = "UPDATE Email_password SET password= ? WHERE Account_email= ?";
         }
 
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, password);
             statement.setString(2, account.getEmail());
@@ -259,6 +266,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     public String getPassword(Account account) throws DaoException {
         String sql = "SELECT password FROM Email_password WHERE Account_email= ? ";
         String result = null;
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, account.getEmail());
             ResultSet rs = statement.executeQuery();
@@ -279,6 +287,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     public boolean isPasswordMatch(String email, String password) throws DaoException {
         String sql = "SELECT COUNT(*) as MATCHES FROM Email_password WHERE Account_email=? AND password=?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
             statement.setString(2, password);
@@ -293,6 +302,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     public Account getByEmail(String email) throws DaoException {
         List<Account> result;
         String sql = "SELECT * FROM Accounts WHERE email=?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
             ResultSet rs = statement.executeQuery();
@@ -313,6 +323,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
         } else {
             sql = "INSERT INTO Account_avatar (Avatar, Account_id) VALUES(?,?)";
         }
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             Blob blob = new SerialBlob(image);
             statement.setBlob(1, blob);
@@ -326,6 +337,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
     private boolean isAccountAvatar(Account account) throws DaoException {
         String sql = "SELECT COUNT(*) AS MATCHES FROM Account_avatar WHERE Account_id=?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, account.getId());
             ResultSet rs = statement.executeQuery();
@@ -339,6 +351,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     public byte[] getAvatar(Account account) throws DaoException {
         byte[] result;
         String sql = "SELECT avatar FROM Account_avatar WHERE Account_id=?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, account.getId());
             ResultSet rs = statement.executeQuery();
@@ -359,6 +372,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
     private byte[] getDefaultAvatar(int id) throws DaoException {
         byte[] result = null;
         String sql = "SELECT avatar FROM Default_avatars WHERE id=?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();

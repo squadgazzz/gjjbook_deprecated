@@ -36,8 +36,8 @@
                     <label>Password:</label>
                     <input class="form-control" type="password" name="password" placeholder="Password"/><br/>
                     <input type="submit" value="Login" class="btn btn-block"/> Remember me? <input type="checkbox"
-                                                                                                  name="rememberMe"
-                                                                                                  value="remember">
+                                                                                                   name="rememberMe"
+                                                                                                   value="remember">
                     <span style="color: red">
                         <c:if test="${not empty requestScope.errMsg}">
                             <c:out value="${requestScope.errMsg}"/>

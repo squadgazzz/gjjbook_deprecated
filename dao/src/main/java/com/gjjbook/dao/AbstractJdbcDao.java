@@ -1,6 +1,6 @@
 package com.gjjbook.dao;
 
-import com.gjjbook.domain.Account;
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Identified;
 
 import java.sql.Connection;
@@ -10,10 +10,11 @@ import java.sql.SQLException;
 import java.util.List;
 
 public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements GenericDao<T, PK> {
+    protected ConnectionPool connectionPool;
     protected Connection connection;
 
-    public AbstractJdbcDao(Connection connection) {
-        this.connection = connection;
+    public AbstractJdbcDao(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
     }
 
     protected abstract String getSelectQuery();
@@ -35,6 +36,7 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
     @Override
     public T getByPK(PK key) throws DaoException {
         List<T> list;
+        Connection connection = connectionPool.getConnection();
         String sql = getSelectQuery();
         sql += getWhereByPKQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -62,6 +64,7 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
     @Override
     public List<T> getAll() throws DaoException {
         List<T> list;
+        Connection connection = connectionPool.getConnection();
         String sql = getSelectQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             ResultSet rs = statement.executeQuery();
@@ -69,6 +72,7 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
         } catch (Exception e) {
             throw new DaoException(e);
         }
+
         return list;
     }
 
@@ -78,6 +82,7 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
             return;
         }
 
+        Connection connection = connectionPool.getConnection();
         String sql = getUpdateQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             prepareStatementForUpdate(statement, object);
@@ -89,7 +94,6 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
         } catch (Exception e) {
             throw new DaoException(e);
         }
-
     }
 
     @Override
@@ -98,6 +102,7 @@ public abstract class AbstractJdbcDao<T extends Identified<PK>, PK> implements G
             return;
         }
 
+        Connection connection = connectionPool.getConnection();
         String sql = getDeleteQuery();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             prepareStatementForDelete(statement, object);

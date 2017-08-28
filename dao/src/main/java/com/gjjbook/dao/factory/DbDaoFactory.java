@@ -8,22 +8,22 @@ import com.gjjbook.domain.Phone;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
-public class DbDaoFactory implements DaoFactory<Connection> {
+public class DbDaoFactory implements DaoFactory<ConnectionPool> {
+    private final ConnectionPool connectionPool;
     private String driver;
     private String user;
     private String password;
     private String url;
     private int connectionsCount;
     private Map<Class, DAOCreator> creators;
-    private final ConnectionPool connectionPool;
-    private final Queue<Connection> openedConnections = new LinkedList<>();
 
     public DbDaoFactory() throws DaoException {
         setDbProperties();
-        connectionPool = new ConnectionPool(driver, user, password, url, connectionsCount);
+        connectionPool = ConnectionPool.getInstance(driver, user, password, url, connectionsCount);
         fillCreators();
     }
 
@@ -34,22 +34,22 @@ public class DbDaoFactory implements DaoFactory<Connection> {
 
     private void fillCreators() {
         creators = new HashMap<Class, DAOCreator>();
-        creators.put(Group.class, new DAOCreator<Connection>() {
+        creators.put(Group.class, new DAOCreator<ConnectionPool>() {
             @Override
-            public GenericDao create(Connection connection) {
-                return new GroupDao(connection);
+            public GenericDao create(ConnectionPool connectionPool) {
+                return new GroupDao(connectionPool);
             }
         });
-        creators.put(Account.class, new DAOCreator<Connection>() {
+        creators.put(Account.class, new DAOCreator<ConnectionPool>() {
             @Override
-            public GenericDao create(Connection connection) {
-                return new AccountDao(connection);
+            public GenericDao create(ConnectionPool connectionPool) {
+                return new AccountDao(connectionPool);
             }
         });
-        creators.put(Phone.class, new DAOCreator<Connection>() {
+        creators.put(Phone.class, new DAOCreator<ConnectionPool>() {
             @Override
-            public GenericDao create(Connection connection) {
-                return new PhoneDao(connection);
+            public GenericDao create(ConnectionPool connectionPool) {
+                return new PhoneDao(connectionPool);
             }
         });
     }
@@ -69,18 +69,16 @@ public class DbDaoFactory implements DaoFactory<Connection> {
         }
     }
 
-    public Connection getContext() throws DaoException {
-        Connection connection = connectionPool.getConnection();
-        openedConnections.add(connection);
-        return connection;
+    public ConnectionPool getContext() throws DaoException {
+        return connectionPool;
     }
 
     @Override
-    public GenericDao getDao(Connection connection, Class dtoClass) throws DaoException {
+    public GenericDao getDao(ConnectionPool connectionPool, Class dtoClass) throws DaoException {
         DAOCreator creator = creators.get(dtoClass);
         if (creator == null) {
             throw new DaoException("Dao object for " + dtoClass + " not found.");
         }
-        return creator.create(connection);
+        return creator.create(connectionPool);
     }
 }

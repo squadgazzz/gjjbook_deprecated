@@ -2,6 +2,7 @@ package com.gjjbook;
 
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.GenericDao;
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.dao.factory.DaoFactory;
 import com.gjjbook.domain.Account;
 import org.junit.After;
@@ -12,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class AccountServiceTest {
     private GenericDao<Account, Integer> accountDao;
 
     @Mock
-    private DaoFactory<Connection> factory;
+    private DaoFactory<ConnectionPool> factory;
 
     @InjectMocks
     private AccountService accountService;

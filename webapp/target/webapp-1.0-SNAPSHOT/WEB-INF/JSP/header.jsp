@@ -55,8 +55,10 @@
                                 <a class="dropdown-toggle" data-toggle="dropdown" href="">${account.email}
                                     <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <li><a href="${pageContext.request.contextPath}/"><span class="glyphicon glyphicon-user"></span> My page</a></li>
-                                    <li><a href="${pageContext.request.contextPath}/logout"><span class="glyphicon glyphicon-log-out"></span>
+                                    <li><a href="${pageContext.request.contextPath}/"><span
+                                            class="glyphicon glyphicon-user"></span> My page</a></li>
+                                    <li><a href="${pageContext.request.contextPath}/logout"><span
+                                            class="glyphicon glyphicon-log-out"></span>
                                         Logout</a>
                                     </li>
                                 </ul>

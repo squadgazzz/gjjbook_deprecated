@@ -16,10 +16,10 @@
     </style>
 </head>
 <body>
-<c:set var="service" value="${sessionScope.accountService}"/>
+<%--<c:set var="service" value="${sessionScope.accountService}"/>
 <c:set var="id" value="${param.id}"/>
 <c:set var="account" value="${service.getByPk(id)}"/>
-<c:set var="image" value="${service.getEncodedAvatar(account)}"/>
+<c:set var="image" value="${service.getEncodedAvatar(account)}"/>--%>
 <div class="fixed-centered container">
     <div class="row row-top">
         <div class="col-xs-2">
@@ -43,9 +43,9 @@
             <div class="row">
                 <div class="col-xs-12 col-left" align="center">
                     <div class="well">
-                        <c:set var="image" value="${service.getEncodedAvatar(account)}"/>
+                        <%--<c:set var="image" value="${service.getEncodedAvatar(account)}"/>--%>
                         <img width="100%" alt="Avatar"
-                             src="data:image/jpeg;base64,${image}"/><br/><br/>
+                             src="data:image/jpeg;base64,${avatar}"/><br/><br/>
                         <form method="post" action="/updateavatar" enctype="multipart/form-data">
                             Select a file: <input type="file" name="avatar">
                             <input type="submit" class="btn btn-block" value="Upload">
@@ -59,6 +59,7 @@
                 <div class="col-xs-12 col-right">
                     <div class="well">
                         <form method="post" action="/updateaccount">
+                            <input type="hidden" name="id" value="${account.id}">
                             <table class="table">
                                 <tbody>
                                 <tr>
@@ -132,7 +133,8 @@
                                 </tr>
                                 <tr>
                                     <td>Additional info:</td>
-                                    <td><textarea name="additional_info" rows="10" cols="30">${account.additionalInfo}</textarea></td>
+                                    <td><textarea name="additional_info" rows="10"
+                                                  cols="30">${account.additionalInfo}</textarea></td>
                                 </tr>
                                 <tr>
                                     <td>Email:</td>
@@ -140,7 +142,8 @@
                                 </tr>
                                 <tr>
                                     <td>Password:</td>
-                                    <td><input type="password" name="password" value="${service.getPassword(account)}" required></td>
+                                    <td><input type="password" name="password" value="${password}"
+                                               required></td>
                                 </tr>
                                 </tbody>
                             </table>

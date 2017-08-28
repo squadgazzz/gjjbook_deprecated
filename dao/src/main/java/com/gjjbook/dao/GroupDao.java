@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Group;
 
 import java.sql.Connection;
@@ -11,8 +12,8 @@ import java.util.List;
 
 public class GroupDao extends AbstractAutoIncrementIdDao<Group, Integer> {
 
-    public GroupDao(Connection connection) {
-        super(connection);
+    public GroupDao(ConnectionPool connectionPool) {
+        super(connectionPool);
     }
 
     @Override

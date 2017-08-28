@@ -1,6 +1,7 @@
 package com.gjjbook.servlet;
 
 import com.gjjbook.AccountService;
+import com.gjjbook.ServiceException;
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.domain.Account;
 
@@ -30,7 +31,7 @@ public class UpdateAvatar extends HttpServlet {
             AccountService service = (AccountService) req.getSession().getAttribute("accountService");
             try {
                 service.setAvatar(account, image);
-            } catch (DaoException e) {
+            } catch (ServiceException e) {
                 throw new ServletException(e);
             }
         }

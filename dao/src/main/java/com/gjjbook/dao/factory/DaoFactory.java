@@ -1,7 +1,7 @@
 package com.gjjbook.dao.factory;
 
-import com.gjjbook.dao.GenericDao;
 import com.gjjbook.dao.DaoException;
+import com.gjjbook.dao.GenericDao;
 
 import java.io.Closeable;
 
@@ -11,13 +11,12 @@ import java.io.Closeable;
 public interface DaoFactory<Context> extends Closeable {
 
     /**
-     * @return connection to database
+     * @return connection pool to database
      * @throws DaoException
      */
     Context getContext() throws DaoException;
 
     /**
-     * @param context
      * @param dtoClass
      * @return object to manage persistent object state
      * @throws DaoException

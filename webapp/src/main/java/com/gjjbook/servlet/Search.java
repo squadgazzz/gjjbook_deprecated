@@ -1,7 +1,7 @@
 package com.gjjbook.servlet;
 
 import com.gjjbook.AccountService;
-import com.gjjbook.dao.DaoException;
+import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
 
 import javax.servlet.ServletException;
@@ -21,7 +21,7 @@ public class Search extends HttpServlet {
         List<Account> accounts;
         try {
             accounts = service.findByPartName(req.getParameter("q"));
-        } catch (DaoException e) {
+        } catch (ServiceException e) {
             throw new ServletException(e);
         }
         req.setAttribute("accounts", accounts);

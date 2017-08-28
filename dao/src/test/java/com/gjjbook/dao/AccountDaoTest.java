@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.dao.factory.DaoFactory;
 import com.gjjbook.dao.factory.DbDaoFactory;
 import com.gjjbook.domain.Account;
@@ -19,22 +20,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class AccountDaoTest {
-    private DaoFactory<Connection> daoFactory;
-    private Connection connection;
+    private DaoFactory<ConnectionPool> daoFactory;
+    private ConnectionPool connectionPool;
     private GenericDao<Account, Integer> accountDao;
 
     @Before
     public void setUp() throws Exception, DaoException {
         daoFactory = new DbDaoFactory();
-        connection = daoFactory.getContext();
+        connectionPool = daoFactory.getContext();
         RunScript runScript = new RunScript();
+        Connection connection = connectionPool.getConnection();
         FileReader fr = new FileReader("src/test/resources/createAccounts.sql");
         runScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createPhones.sql");
         runScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createFriends.sql");
         runScript.execute(connection, fr);
-        accountDao = daoFactory.getDao(connection, Account.class);
+        accountDao = daoFactory.getDao(connectionPool, Account.class);
+        connectionPool.recycle(connection);
     }
 
     @After
@@ -44,7 +47,7 @@ public class AccountDaoTest {
 
     @Test
     public void getContext() throws Exception, DaoException {
-        Assert.assertNotNull(connection);
+        Assert.assertNotNull(connectionPool);
     }
 
     @Test

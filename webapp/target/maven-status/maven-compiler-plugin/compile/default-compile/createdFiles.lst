@@ -1,3 +1,4 @@
+com\gjjbook\servlet\EditAccountServlet.class
 com\gjjbook\servlet\IndexFilter.class
 com\gjjbook\servlet\Logout.class
 com\gjjbook\servlet\AuthenticationFilter.class
@@ -5,5 +6,6 @@ com\gjjbook\servlet\Search.class
 com\gjjbook\servlet\UpdateAccount.class
 com\gjjbook\servlet\RegisterUpdateAccount.class
 com\gjjbook\servlet\AccountRegistration.class
+com\gjjbook\servlet\AccountServlet.class
 com\gjjbook\servlet\UpdateAvatar.class
 com\gjjbook\servlet\LoginAuthenticate.class

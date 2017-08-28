@@ -1,5 +1,6 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
 
@@ -12,8 +13,8 @@ import java.util.List;
 
 public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
 
-    public PhoneDao(Connection connection) {
-        super(connection);
+    public PhoneDao(ConnectionPool connectionPool) {
+        super(connectionPool);
     }
 
     @Override
@@ -42,6 +43,7 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
         List<Phone> list;
         String sql = getSelectQuery();
         sql += " WHERE Accounts_id = ?";
+        Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
