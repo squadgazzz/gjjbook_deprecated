@@ -48,15 +48,9 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection); // done: 30.08.2017 переместить роллбэк в файналли
             renewConnection(connectionPool, connection);
         }
     }
@@ -75,15 +69,9 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
             daoObject.update(object);
             connection.commit();
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -102,15 +90,9 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
             daoObject.delete(object);
             connection.commit();
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -130,15 +112,9 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -154,15 +130,9 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -179,6 +149,16 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
                 connectionPool.recycle(connection);
             } catch (SQLException | DaoException e) {
                 throw new ServiceException(e);
+            }
+        }
+    }
+
+    protected void rollback(Connection connection) throws ServiceException {
+        if (connection != null) {
+            try {
+                connection.rollback();
+            } catch (SQLException ee) {
+                throw new ServiceException(ee);
             }
         }
     }

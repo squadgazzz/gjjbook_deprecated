@@ -98,15 +98,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -125,15 +119,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             ((AccountDao) daoObject).setPassword(account, password);
             connection.commit();
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -153,15 +141,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -181,15 +163,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -209,15 +185,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -236,15 +206,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             ((AccountDao) daoObject).setAvatar(account, image);
             connection.commit();
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }
@@ -264,15 +228,9 @@ public class AccountService extends AbstractService<Account, Integer> {
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ee) {
-                    throw new ServiceException(e);
-                }
-            }
             throw new ServiceException(e);
         } finally {
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }

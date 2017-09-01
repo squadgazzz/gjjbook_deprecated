@@ -1,7 +1,9 @@
 package com.gjjbook.dao.factory;
 
 import com.gjjbook.dao.*;
+import com.gjjbook.dao.connectionPool.ConcurrentConnectionPool;
 import com.gjjbook.dao.connectionPool.ConnectionPool;
+import com.gjjbook.dao.connectionPool.JndiConnectionPool;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Group;
 import com.gjjbook.domain.Phone;
@@ -23,7 +25,8 @@ public class DbDaoFactory implements DaoFactory<ConnectionPool> {
 
     public DbDaoFactory() throws DaoException {
         setDbProperties();
-        connectionPool = ConnectionPool.getInstance(driver, user, password, url, connectionsCount);
+//        connectionPool = ConcurrentConnectionPool.getInstance(driver, user, password, url, connectionsCount);
+        connectionPool = JndiConnectionPool.getInstance();
         fillCreators();
     }
 

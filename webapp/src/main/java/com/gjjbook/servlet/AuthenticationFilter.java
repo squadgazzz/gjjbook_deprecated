@@ -50,7 +50,7 @@ public class AuthenticationFilter implements Filter {
                 }
                 if (email != null && password != null) {
                     HttpSession session = req.getSession();
-                    req.setAttribute("email", email); // done: 10.08.2017 после завершения сессии нужно оставаться на той же странице, не по полному пути переходил..
+                    req.setAttribute("email", email);
                     req.setAttribute("password", password);
                     req.setAttribute("path", path);
                     if (session.getAttribute("accountService") == null) {
