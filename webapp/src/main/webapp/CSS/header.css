@@ -34,6 +34,10 @@
     width: 200%;
 }
 
+.gjjbook-header .input-group input.form-control {
+    width: 100%;
+}
+
 .gjjbook-header ul.nav li.dropdown:hover ul.dropdown-menu {
     display: block;
 }
@@ -54,82 +58,24 @@
     transition: width 0.4s ease-in-out;
 }
 
-.gjjbook-header i.glyphicon-search {
+.gjjbook-header .glyphicon-search {
+    height: 20px;
+    padding-top: 3px;
     color: #34495e;
 }
 
-/*
-@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro');
-@import url('//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css');
-body {
-    margin: 0px;
-    font-family: 'Source Sans Pro', sans-serif;
+.gjjbook-header .btn-default {
+    margin: auto;
 }
 
-ul {
-    position: fixed;
-    border: none !important;
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #34495E;
-    height: 50px;
-    width: 100%;
-    display: table;
+.gjjbook-header .navbar-form {
+    padding: 0 0 0 0;
 }
 
-.icon {
-    color: white;
-    padding: 14px 10px;
-    position: absolute
+.gjjbook-header .col-xs-3 {
+    padding: 0 0 0 2px;
 }
 
-ul > li {
-    height: 100%;
-    float: left;
+.gjjbook-header .form-control {
+    padding-right: 15px;
 }
-
-ul > li > logo > a {
-    display: table-cell;
-    padding: 14px 50px 0px 50px;
-    color: white;
-    text-align:center;
-    vertical-align: middle;
-    text-decoration: none;
-}
-
-ul > li > a {
-    display: table-cell;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-}
-
-::placeholder {
-    color: #DADFE1;
-}
-
-ul > li > a:hover {
-    background-color: #2C3E50;
-}
-
-ul > li > form > input{
-    height: 100%;
-    transition: ease-in-out, width .5s ease-in-out;
-    width: 0px;
-    padding: 0px 21px;
-    border: 0px;
-    background: #2C3E50 url(http://www.iconsdb.com/icons/download/color/DADFE1/search-13-24.png) no-repeat 8px 13px;
-}
-
-ul > li > form > input:focus {
-    outline-width: 0;
-    color: white;
-}
-
-ul > li > form > input:hover {
-    width:100%;
-    padding: 0px 38px;
-}*/

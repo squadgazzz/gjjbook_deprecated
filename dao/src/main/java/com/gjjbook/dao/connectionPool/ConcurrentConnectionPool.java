@@ -51,7 +51,6 @@ public class ConcurrentConnectionPool extends ConnectionPool {
         }
 
         try {
-            semaphore.acquire();
             LOCK.lock();
             connection = freeConnections.poll();
             if (connection != null) {
@@ -60,8 +59,6 @@ public class ConcurrentConnectionPool extends ConnectionPool {
             } else {
                 return createConnection();
             }
-        } catch (InterruptedException e) {
-            throw new DaoException(e);
         } finally {
             LOCK.unlock();
         }
@@ -69,26 +66,25 @@ public class ConcurrentConnectionPool extends ConnectionPool {
 
     private Connection createConnection() throws DaoException {
         try {
+            semaphore.acquire();
             Connection connection = DriverManager.getConnection(url, user, password);
             CONNECTION_THREAD_LOCAL.set(connection);
             return connection;
-        } catch (SQLException e) {
+        } catch (SQLException | InterruptedException e) {
             throw new DaoException(e);
         }
-
     }
 
     @Override
     public void recycle(Connection connection) throws DaoException {
         try {
             LOCK.lock();
-            if (!connection.isClosed()) {
-                freeConnections.offer(connection);
+            if (!connection.isClosed() && freeConnections.offer(connection)) {
+                semaphore.release();
             }
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
-            semaphore.release();
             LOCK.unlock();
         }
     }

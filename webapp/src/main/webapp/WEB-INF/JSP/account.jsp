@@ -15,9 +15,6 @@
     </style>
 </head>
 <body>
-<%--<c:set var="service" value="${sessionScope.accountService}"/>--%>
-<%--<c:set var="id" value="${param.id}"/>--%>
-<%--<c:set var="account" value="${service.getByPk(id)}"/>--%>
 <c:choose>
     <c:when test="${empty account}">
         <% response.sendError(HttpServletResponse.SC_NOT_FOUND); %>

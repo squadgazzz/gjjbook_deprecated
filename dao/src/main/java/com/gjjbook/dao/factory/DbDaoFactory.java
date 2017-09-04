@@ -25,8 +25,8 @@ public class DbDaoFactory implements DaoFactory<ConnectionPool> {
 
     public DbDaoFactory() throws DaoException {
         setDbProperties();
-//        connectionPool = ConcurrentConnectionPool.getInstance(driver, user, password, url, connectionsCount);
-        connectionPool = JndiConnectionPool.getInstance();
+        connectionPool = ConcurrentConnectionPool.getInstance(driver, user, password, url, connectionsCount);
+//        connectionPool = JndiConnectionPool.getInstance();
         fillCreators();
     }
 

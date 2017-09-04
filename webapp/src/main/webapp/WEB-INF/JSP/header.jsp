@@ -40,7 +40,7 @@
                             <div class="input-group">
                                 <div class="input-group-btn">
                                     <button class="btn btn-default" type="submit">
-                                        <i class="glyphicon glyphicon-search"></i>
+                                        <span class="glyphicon glyphicon-search"></span>
                                     </button>
                                 </div>
                                 <input type="search" class="form-control" placeholder="Search" name="q">
