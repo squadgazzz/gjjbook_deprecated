@@ -23,9 +23,11 @@ public class LoginAuthenticate extends HttpServlet {
         RequestDispatcher rq = getServletContext().getRequestDispatcher("/login");
         String email = (String) req.getAttribute("email");
         String password = (String) req.getAttribute("password");
+        boolean isEncrypted = true;
         if (email == null || password == null) {
             email = req.getParameter("email");
             password = req.getParameter("password");
+            isEncrypted = false;
         }
         if (email == null || password == null) {
             req.setAttribute("errMsg", "Please Enter UserName and Password");
@@ -38,11 +40,14 @@ public class LoginAuthenticate extends HttpServlet {
                     service = new AccountService();
                     session.setAttribute("accountService", service);
                 }
-                if (service.isPasswordMatch(email, password)) {
+                if (service.isPasswordMatch(email, password, isEncrypted)) {
                     Account loggedUser = service.getByEmail(email);
                     session.setAttribute("loggedUser", loggedUser);
                     if (req.getParameter("rememberMe") != null) {
                         resp.addCookie(new Cookie("email", email));
+                        if (!isEncrypted) {
+                            password = service.getPassword(loggedUser);
+                        }
                         resp.addCookie(new Cookie("password", password));
                     }
                     String path = (String) req.getAttribute("path");

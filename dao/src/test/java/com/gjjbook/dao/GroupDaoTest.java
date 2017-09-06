@@ -1,8 +1,7 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConcurrentConnectionPool;
 import com.gjjbook.dao.connectionPool.ConnectionPool;
-import com.gjjbook.dao.factory.DaoFactory;
-import com.gjjbook.dao.factory.DbDaoFactory;
 import com.gjjbook.domain.Group;
 import org.h2.tools.RunScript;
 import org.junit.After;
@@ -16,24 +15,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GroupDaoTest {
-    private DaoFactory<ConnectionPool> daoFactory;
     private ConnectionPool connectionPool;
     private GenericDao<Group, Integer> groupDao;
 
     @Before
     public void setUp() throws Exception, DaoException {
-        daoFactory = new DbDaoFactory();
-        connectionPool = daoFactory.getContext();
+        connectionPool = ConcurrentConnectionPool.getInstance();
         Connection connection = connectionPool.getConnection();
-        RunScript runScript = new RunScript();
         FileReader fr = new FileReader("src/test/resources/createGroups.sql");
-        runScript.execute(connection, fr);
-        groupDao = daoFactory.getDao(connectionPool, Group.class);
+        RunScript.execute(connection, fr);
+        connectionPool.recycle(connection);
+        groupDao = new GroupDao(connectionPool);
     }
 
     @After
-    public void tearDown() throws Exception {
-        daoFactory.close();
+    public void tearDown() throws Exception, DaoException {
+        FileReader fr = new FileReader("src/test/resources/dropDb.sql");
+        RunScript.execute(connectionPool.getConnection(), fr);
+        connectionPool.close();
     }
 
     @Test

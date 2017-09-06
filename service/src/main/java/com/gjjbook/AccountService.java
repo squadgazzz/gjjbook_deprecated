@@ -126,7 +126,7 @@ public class AccountService extends AbstractService<Account, Integer> {
         }
     }
 
-    public boolean isPasswordMatch(String email, String password) throws ServiceException {
+    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) throws ServiceException {
         if (email == null || password == null) {
             throw new ServiceException("Email or password is null");
         }
@@ -137,7 +137,7 @@ public class AccountService extends AbstractService<Account, Integer> {
             connectionPool = factory.getContext();
             connection = connectionPool.getConnection();
             connection.setAutoCommit(false);
-            boolean result = ((AccountDao) daoObject).isPasswordMatch(email, password);
+            boolean result = ((AccountDao) daoObject).isPasswordMatch(email, password, isEncrypted);
             connection.commit();
             return result;
         } catch (DaoException | SQLException e) {

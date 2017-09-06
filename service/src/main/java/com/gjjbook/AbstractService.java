@@ -50,7 +50,7 @@ public abstract class AbstractService<T extends Identified<PK>, PK extends Integ
         } catch (DaoException | SQLException e) {
             throw new ServiceException(e);
         } finally {
-            rollback(connection); // done: 30.08.2017 переместить роллбэк в файналли
+            rollback(connection);
             renewConnection(connectionPool, connection);
         }
     }

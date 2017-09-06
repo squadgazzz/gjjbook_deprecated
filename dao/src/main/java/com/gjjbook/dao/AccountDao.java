@@ -4,6 +4,7 @@ import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.Sex;
+import org.mindrot.jbcrypt.BCrypt;
 
 import javax.sql.rowset.serial.SerialBlob;
 import java.sql.*;
@@ -255,7 +256,7 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
 
         Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, password);
+            statement.setString(1, BCrypt.hashpw(password, BCrypt.gensalt()));
             statement.setString(2, account.getEmail());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -285,15 +286,22 @@ public class AccountDao extends AbstractAutoIncrementIdDao<Account, Integer> {
         return result;
     }
 
-    public boolean isPasswordMatch(String email, String password) throws DaoException {
-        String sql = "SELECT COUNT(*) as MATCHES FROM Email_password WHERE Account_email=? AND password=?";
+    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) throws DaoException {
+        String sql = "SELECT password FROM Email_password WHERE Account_email=?";
         Connection connection = connectionPool.getConnection();
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, email);
-            statement.setString(2, password);
             ResultSet rs = statement.executeQuery();
-
-            return rs.next() && rs.getInt("MATCHES") != 0;
+            if (rs.next()) {
+                String dbPassword = rs.getString("password");
+                if (isEncrypted) {
+                    return dbPassword.equals(password);
+                } else {
+                    return BCrypt.checkpw(password, dbPassword);
+                }
+            } else {
+                return false;
+            }
         } catch (SQLException e) {
             throw new DaoException(e);
         }

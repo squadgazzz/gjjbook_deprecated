@@ -1,4 +1,4 @@
-CREATE TABLE `Groups` (
+CREATE TABLE IF NOT EXISTS `Groups` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `description` VARCHAR(45) NOT NULL,

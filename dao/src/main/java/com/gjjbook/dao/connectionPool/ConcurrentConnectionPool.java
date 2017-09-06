@@ -3,9 +3,11 @@ package com.gjjbook.dao.connectionPool;
 import com.gjjbook.dao.DaoException;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -13,29 +15,30 @@ import java.util.concurrent.Semaphore;
 
 public class ConcurrentConnectionPool extends ConnectionPool {
     private static ConcurrentConnectionPool instance;
-    private final Semaphore semaphore;
-    private final String user;
-    private final String password;
-    private final String url;
-    private final BlockingQueue<Connection> freeConnections = new LinkedBlockingQueue<>();
 
-    private ConcurrentConnectionPool(String driver, String user, String password, String url, int maxConnections) {
-        this.user = user;
-        this.password = password;
-        this.url = url;
+    private final Semaphore semaphore;
+    private final BlockingQueue<Connection> freeConnections = new LinkedBlockingQueue<>();
+    private String driver;
+    private String user;
+    private String password;
+    private String url;
+    private int connectionsCount;
+
+    private ConcurrentConnectionPool() throws DaoException {
         try {
+            setDbProperties();
             Class.forName(driver);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+        } catch (ClassNotFoundException | DaoException e) {
+            throw new DaoException(e);
         }
-        semaphore = new Semaphore(maxConnections);
+        semaphore = new Semaphore(connectionsCount);
     }
 
-    public static ConnectionPool getInstance(String driver, String user, String password, String url, int maxConnections) {
+    public static ConnectionPool getInstance() throws DaoException {
         try {
             LOCK.lock();
             if (instance == null) {
-                instance = new ConcurrentConnectionPool(driver, user, password, url, maxConnections);
+                instance = new ConcurrentConnectionPool();
             }
             return instance;
         } finally {
@@ -44,14 +47,14 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     }
 
     @Override
-    public Connection getConnection() throws DaoException { // done: 30.08.2017 уменьшить синхронизацию
+    public Connection getConnection() throws DaoException {
         Connection connection = CONNECTION_THREAD_LOCAL.get();
-        if (connection != null) {
-            return connection;
-        }
-
         try {
-            LOCK.lock();
+            if (connection != null && !connection.isClosed()) {
+                return connection;
+            }
+
+            semaphore.acquire();
             connection = freeConnections.poll();
             if (connection != null) {
                 CONNECTION_THREAD_LOCAL.set(connection);
@@ -59,18 +62,18 @@ public class ConcurrentConnectionPool extends ConnectionPool {
             } else {
                 return createConnection();
             }
-        } finally {
-            LOCK.unlock();
+        } catch (SQLException | InterruptedException e) {
+            throw new DaoException(e);
         }
     }
 
     private Connection createConnection() throws DaoException {
         try {
-            semaphore.acquire();
             Connection connection = DriverManager.getConnection(url, user, password);
             CONNECTION_THREAD_LOCAL.set(connection);
             return connection;
-        } catch (SQLException | InterruptedException e) {
+
+        } catch (SQLException e) {
             throw new DaoException(e);
         }
     }
@@ -79,9 +82,12 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     public void recycle(Connection connection) throws DaoException {
         try {
             LOCK.lock();
-            if (!connection.isClosed() && freeConnections.offer(connection)) {
-                semaphore.release();
+            if (!connection.isClosed()) {
+                freeConnections.offer(connection);
+            } else {
+                freeConnections.remove(connection);
             }
+            semaphore.release();
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -95,7 +101,9 @@ public class ConcurrentConnectionPool extends ConnectionPool {
                 try {
                     if (!c.isClosed()) {
                         c.close();
+                        connections.remove(c);
                     }
+                    semaphore.release();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -106,5 +114,20 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     @Override
     public void close() throws IOException {
         close(freeConnections);
+    }
+
+    private void setDbProperties() throws DaoException {
+        try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("db.properties"))) {
+            Properties properties = new Properties();
+
+            properties.load(is);
+            url = properties.getProperty("db.url");
+            user = properties.getProperty("db.login");
+            password = properties.getProperty("db.password");
+            driver = properties.getProperty("jdbc.driver");
+            connectionsCount = Integer.parseInt(properties.getProperty("jdbc.connections_count"));
+        } catch (IOException e) {
+            throw new DaoException(e);
+        }
     }
 }

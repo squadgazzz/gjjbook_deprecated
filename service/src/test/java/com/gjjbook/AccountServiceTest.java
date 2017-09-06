@@ -13,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,12 +33,21 @@ public class AccountServiceTest {
     @Mock
     private DaoFactory<ConnectionPool> factory;
 
+    @Mock
+    private ConnectionPool connectionPool;
+
+    @Mock
+    private Connection connection;
+
     @InjectMocks
     private AccountService accountService;
 
     @Before
     public void setUp() throws Exception, ServiceException, DaoException {
         accountService = new AccountService(factory, accountDao);
+        when(accountDao.create(new Account())).thenReturn(account);
+        when(factory.getContext()).thenReturn(connectionPool);
+        when(connectionPool.getConnection()).thenReturn(connection);
     }
 
     @After
@@ -47,8 +57,6 @@ public class AccountServiceTest {
 
     @Test
     public void create() throws Exception, DaoException, ServiceException {
-        when(accountDao.create(new Account())).thenReturn(account);
-
         assertEquals(account, accountService.create(new Account()));
         assertNotEquals(mock(Account.class), accountService.create(new Account()));
 

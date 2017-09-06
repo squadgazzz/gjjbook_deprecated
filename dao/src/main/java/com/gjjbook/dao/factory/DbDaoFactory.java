@@ -9,24 +9,16 @@ import com.gjjbook.domain.Group;
 import com.gjjbook.domain.Phone;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 public class DbDaoFactory implements DaoFactory<ConnectionPool> {
     private final ConnectionPool connectionPool;
-    private String driver;
-    private String user;
-    private String password;
-    private String url;
-    private int connectionsCount;
     private Map<Class, DAOCreator> creators;
 
     public DbDaoFactory() throws DaoException {
-        setDbProperties();
-        connectionPool = ConcurrentConnectionPool.getInstance(driver, user, password, url, connectionsCount);
-//        connectionPool = JndiConnectionPool.getInstance();
+//        connectionPool = ConcurrentConnectionPool.getInstance(); // done: 04.09.2017 сделать тесты
+        connectionPool = JndiConnectionPool.getInstance();
         fillCreators();
     }
 
@@ -55,21 +47,6 @@ public class DbDaoFactory implements DaoFactory<ConnectionPool> {
                 return new PhoneDao(connectionPool);
             }
         });
-    }
-
-    private void setDbProperties() throws DaoException {
-        try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("db.properties"))) {
-            Properties properties = new Properties();
-            properties.load(is);
-
-            url = properties.getProperty("db.url");
-            user = properties.getProperty("db.login");
-            password = properties.getProperty("db.password");
-            driver = properties.getProperty("jdbc.driver");
-            connectionsCount = Integer.parseInt(properties.getProperty("jdbc.connections_count"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public ConnectionPool getContext() throws DaoException {

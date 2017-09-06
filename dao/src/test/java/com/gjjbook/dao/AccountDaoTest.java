@@ -1,8 +1,7 @@
 package com.gjjbook.dao;
 
+import com.gjjbook.dao.connectionPool.ConcurrentConnectionPool;
 import com.gjjbook.dao.connectionPool.ConnectionPool;
-import com.gjjbook.dao.factory.DaoFactory;
-import com.gjjbook.dao.factory.DbDaoFactory;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
@@ -19,30 +18,33 @@ import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings("Duplicates")
 public class AccountDaoTest {
-    private DaoFactory<ConnectionPool> daoFactory;
     private ConnectionPool connectionPool;
     private GenericDao<Account, Integer> accountDao;
 
+    public AccountDaoTest() throws DaoException {
+    }
+
     @Before
     public void setUp() throws Exception, DaoException {
-        daoFactory = new DbDaoFactory();
-        connectionPool = daoFactory.getContext();
-        RunScript runScript = new RunScript();
+        connectionPool = ConcurrentConnectionPool.getInstance();
+        accountDao = new AccountDao(connectionPool);
         Connection connection = connectionPool.getConnection();
         FileReader fr = new FileReader("src/test/resources/createAccounts.sql");
-        runScript.execute(connection, fr);
+        RunScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createPhones.sql");
-        runScript.execute(connection, fr);
+        RunScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createFriends.sql");
-        runScript.execute(connection, fr);
-        accountDao = daoFactory.getDao(connectionPool, Account.class);
+        RunScript.execute(connection, fr);
         connectionPool.recycle(connection);
     }
 
     @After
-    public void tearDown() throws Exception {
-        daoFactory.close();
+    public void tearDown() throws Exception, DaoException {
+        FileReader fr = new FileReader("src/test/resources/dropDb.sql");
+        RunScript.execute(connectionPool.getConnection(), fr);
+        connectionPool.close();
     }
 
     @Test

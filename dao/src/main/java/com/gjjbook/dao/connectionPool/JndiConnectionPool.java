@@ -41,10 +41,11 @@ public class JndiConnectionPool extends ConnectionPool {
         try {
             Connection connection = CONNECTION_THREAD_LOCAL.get();
             if (connection != null) {
-                if (connection.isClosed()) {
+                if (!connection.isClosed()) {
+                    return connection;
+                } else {
                     return createConnection();
                 }
-                return connection;
             } else {
                 return createConnection();
             }
@@ -54,15 +55,9 @@ public class JndiConnectionPool extends ConnectionPool {
     }
 
     private Connection createConnection() throws SQLException {
-        Connection connection;
-        try {
-            LOCK.lock();
-            connection = ds.getConnection();
-            CONNECTION_THREAD_LOCAL.set(connection);
-            return connection;
-        } finally {
-            LOCK.unlock();
-        }
+        Connection connection = ds.getConnection();
+        CONNECTION_THREAD_LOCAL.set(connection);
+        return connection;
     }
 
     @Override

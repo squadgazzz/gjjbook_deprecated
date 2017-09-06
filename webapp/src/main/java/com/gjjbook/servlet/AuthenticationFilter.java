@@ -2,6 +2,7 @@ package com.gjjbook.servlet;
 
 import com.gjjbook.AccountService;
 import com.gjjbook.ServiceException;
+import com.gjjbook.domain.Account;
 
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
@@ -29,10 +30,11 @@ public class AuthenticationFilter implements Filter {
             path += "?" + params;
         }
         Cookie[] cookies = req.getCookies();
+        HttpSession currentSession = req.getSession();
 
         if (!path.contains("/login") && !path.contains("/IMG") && !path.contains("/CSS") &&
                 !path.contains("/webjars") && !path.contains("/register") && !path.contains("/account_registration") &&
-                (req.getSession() == null || req.getSession().getAttribute("loggedUser") == null)) {
+                (currentSession == null || currentSession.getAttribute("loggedUser") == null)) {
             String email = null;
             String password = null;
 
@@ -50,16 +52,10 @@ public class AuthenticationFilter implements Filter {
                 }
                 if (email != null && password != null) {
                     HttpSession session = req.getSession();
+                    checkAccountService(session);
                     req.setAttribute("email", email);
                     req.setAttribute("password", password);
                     req.setAttribute("path", path);
-                    if (session.getAttribute("accountService") == null) {
-                        try {
-                            session.setAttribute("accountService", new AccountService());
-                        } catch (ServiceException e) {
-                            throw new ServletException(e);
-                        }
-                    }
                     RequestDispatcher rd = session.getServletContext().getRequestDispatcher("/login_authenticate");
                     rd.forward(req, res);
                 } else {
@@ -68,6 +64,16 @@ public class AuthenticationFilter implements Filter {
             }
         } else {
             filterChain.doFilter(req, res);
+        }
+    }
+
+    private void checkAccountService(HttpSession session) throws ServletException {
+        if (session.getAttribute("accountService") == null) {
+            try {
+                session.setAttribute("accountService", new AccountService());
+            } catch (ServiceException e) {
+                throw new ServletException(e);
+            }
         }
     }
 

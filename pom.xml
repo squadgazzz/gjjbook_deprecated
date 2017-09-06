@@ -12,6 +12,7 @@
         <jstl.version>1.2</jstl.version>
         <bootstrap.version>3.3.7</bootstrap.version>
         <jquery.version>3.2.1</jquery.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
     </properties>
 
     <groupId>com.gjjbook</groupId>

@@ -1,4 +1,4 @@
-CREATE TABLE `Accounts` (
+CREATE TABLE IF NOT EXISTS `Accounts` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `middlename` VARCHAR(45) NULL,
@@ -8,9 +8,9 @@ CREATE TABLE `Accounts` (
   `homeaddress` VARCHAR(45) NULL,
   `workaddress` VARCHAR(45) NULL,
   `email` VARCHAR(45) NOT NULL,
-  `icq` INT NULL,
+  `icq` VARCHAR(45) NULL,
   `skype` VARCHAR(45) NULL,
   `additionalinfo` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`, `email`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
