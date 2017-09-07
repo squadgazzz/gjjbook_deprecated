@@ -82,12 +82,15 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     public void recycle(Connection connection) throws DaoException {
         try {
             LOCK.lock();
-            if (!connection.isClosed()) {
+            if (!connection.isClosed() && !freeConnections.contains(connection)) {
                 freeConnections.offer(connection);
             } else {
                 freeConnections.remove(connection);
             }
-            semaphore.release();
+
+            if (semaphore.availablePermits() < connectionsCount) {
+                semaphore.release();
+            }
         } catch (SQLException e) {
             throw new DaoException(e);
         } finally {
@@ -114,6 +117,7 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     @Override
     public void close() throws IOException {
         close(freeConnections);
+        CONNECTION_THREAD_LOCAL.set(null);
     }
 
     private void setDbProperties() throws DaoException {

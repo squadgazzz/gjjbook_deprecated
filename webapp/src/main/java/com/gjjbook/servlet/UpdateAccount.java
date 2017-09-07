@@ -26,7 +26,10 @@ public class UpdateAccount extends RegisterUpdateAccount {
             try {
                 parseAccountData(req, account);
                 service.update(account);
-                service.setPassword(account, req.getParameter("password"));
+                String password = req.getParameter("password");
+                if (password != null && password.length() > 0) {
+                    service.setPassword(account, req.getParameter("password"));
+                }
                 updateCookies(req, account, service);
             } catch (ServiceException e) {
                 throw new ServletException(e);

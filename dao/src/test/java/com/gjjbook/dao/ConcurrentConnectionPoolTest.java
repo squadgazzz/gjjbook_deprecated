@@ -7,9 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 @SuppressWarnings("Duplicates")
 public class ConcurrentConnectionPoolTest {
@@ -155,6 +156,62 @@ public class ConcurrentConnectionPoolTest {
 
         Assert.assertEquals(connections[0], connections[1]);
 
+        for (Connection c : connections) {
+            connectionPool.recycle(c);
+            if (!c.isClosed()) {
+                c.close();
+            }
+        }
+    }
+
+    @Test
+    public void takeAllConnections() throws InterruptedException, SQLException, DaoException {
+        final Connection[] connections = new Connection[3];
+        Thread threadA = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    connections[0] = connectionPool.getConnection();
+                    Thread.sleep(5000);
+                    connectionPool.recycle(connections[0]);
+                } catch (DaoException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        Thread threadB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    connections[1] = connectionPool.getConnection();
+                    Thread.sleep(6000);
+                    connectionPool.recycle(connections[1]);
+                } catch (DaoException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        Thread threadC = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);
+                    connections[2] = connectionPool.getConnection();
+                    connectionPool.recycle(connections[2]);
+                } catch (DaoException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        threadA.start();
+        threadB.start();
+        threadC.start();
+        threadA.join();
+        threadB.join();
+        threadC.join();
+
+        Assert.assertEquals(connections[0], connections[2]);
 
         for (Connection c : connections) {
             connectionPool.recycle(c);
