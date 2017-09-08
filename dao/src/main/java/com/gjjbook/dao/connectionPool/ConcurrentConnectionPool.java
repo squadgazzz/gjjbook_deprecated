@@ -18,6 +18,7 @@ public class ConcurrentConnectionPool extends ConnectionPool {
 
     private final Semaphore semaphore;
     private final BlockingQueue<Connection> freeConnections = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Connection> busyConnections = new LinkedBlockingQueue<>();
     private String driver;
     private String user;
     private String password;
@@ -57,7 +58,7 @@ public class ConcurrentConnectionPool extends ConnectionPool {
             semaphore.acquire();
             connection = freeConnections.poll();
             if (connection != null) {
-                CONNECTION_THREAD_LOCAL.set(connection);
+                setNewConnection(connection);
                 return connection;
             } else {
                 return createConnection();
@@ -70,7 +71,7 @@ public class ConcurrentConnectionPool extends ConnectionPool {
     private Connection createConnection() throws DaoException {
         try {
             Connection connection = DriverManager.getConnection(url, user, password);
-            CONNECTION_THREAD_LOCAL.set(connection);
+            setNewConnection(connection);
             return connection;
 
         } catch (SQLException e) {
@@ -78,46 +79,61 @@ public class ConcurrentConnectionPool extends ConnectionPool {
         }
     }
 
+    private void setNewConnection(Connection connection) {
+        CONNECTION_THREAD_LOCAL.set(connection);
+        if (!busyConnections.contains(connection)) {
+            busyConnections.add(connection);
+        }
+    }
+
     @Override
     public void recycle(Connection connection) throws DaoException {
-        try {
-            LOCK.lock();
-            if (!connection.isClosed() && !freeConnections.contains(connection)) {
-                freeConnections.offer(connection);
-            } else {
-                freeConnections.remove(connection);
-            }
+        if (CONNECTION_THREAD_LOCAL.get() != null) {
+            try {
+                LOCK.lock();
+                if (!connection.isClosed() && !freeConnections.contains(connection)) {
+                    freeConnections.offer(connection);
+                } else {
+                    freeConnections.remove(connection);
+                }
+                busyConnections.remove(connection);
+                CONNECTION_THREAD_LOCAL.set(null);
 
-            if (semaphore.availablePermits() < connectionsCount) {
-                semaphore.release();
+                if (semaphore.availablePermits() < connectionsCount) {
+                    semaphore.release();
+                }
+            } catch (SQLException e) {
+                throw new DaoException(e);
+            } finally {
+                LOCK.unlock();
             }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        } finally {
-            LOCK.unlock();
         }
     }
 
     private void close(Queue<Connection> connections) {
         if (connections.size() > 0) {
-            for (Connection c : connections) {
-                try {
-                    if (!c.isClosed()) {
-                        c.close();
-                        connections.remove(c);
+            connections.forEach(
+                    c -> {
+                        try {
+                            if (!c.isClosed()) {
+                                c.close();
+                                connections.remove(c);
+                            }
+                            if (semaphore.availablePermits() < connectionsCount) {
+                                semaphore.release();
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    semaphore.release();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            );
         }
     }
 
     @Override
     public void close() throws IOException {
         close(freeConnections);
-        CONNECTION_THREAD_LOCAL.set(null);
+        close(busyConnections);
     }
 
     private void setDbProperties() throws DaoException {

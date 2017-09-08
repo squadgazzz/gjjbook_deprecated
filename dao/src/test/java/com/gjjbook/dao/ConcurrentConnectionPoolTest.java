@@ -9,8 +9,6 @@ import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 @SuppressWarnings("Duplicates")
 public class ConcurrentConnectionPoolTest {
@@ -34,28 +32,26 @@ public class ConcurrentConnectionPoolTest {
     @Test
     public void threadLocalConnection() throws InterruptedException, SQLException, DaoException {
         final Connection[] connections = new Connection[4];
-        Thread threadA = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[0] = connectionPool.getConnection();
-                    connections[1] = connectionPool.getConnection();
-                } catch (DaoException e) {
-                    e.printStackTrace();
+        Thread threadA = new Thread(
+                () -> {
+                    try {
+                        connections[0] = connectionPool.getConnection();
+                        connections[1] = connectionPool.getConnection();
+                    } catch (DaoException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        Thread threadB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[2] = connectionPool.getConnection();
-                    connections[3] = connectionPool.getConnection();
-                } catch (DaoException e) {
-                    e.printStackTrace();
+        );
+        Thread threadB = new Thread(
+                () -> {
+                    try {
+                        connections[2] = connectionPool.getConnection();
+                        connections[3] = connectionPool.getConnection();
+                    } catch (DaoException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
 
         threadA.start();
         threadB.start();
@@ -65,40 +61,31 @@ public class ConcurrentConnectionPoolTest {
         Assert.assertEquals(connections[0], connections[1]);
         Assert.assertEquals(connections[2], connections[3]);
         Assert.assertNotEquals(connections[0], connections[2]);
-
-        for (Connection c : connections) {
-            connectionPool.recycle(c);
-            if (!c.isClosed()) {
-                c.close();
-            }
-        }
     }
 
     @Test
     public void reuseConnection() throws DaoException, InterruptedException, SQLException {
         final Connection[] connections = new Connection[4];
-        Thread threadA = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[0] = connectionPool.getConnection();
-                    connections[1] = connectionPool.getConnection();
-                } catch (DaoException e) {
-                    e.printStackTrace();
+        Thread threadA = new Thread(
+                () -> {
+                    try {
+                        connections[0] = connectionPool.getConnection();
+                        connections[1] = connectionPool.getConnection();
+                    } catch (DaoException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        Thread threadB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[2] = connectionPool.getConnection();
-                    connections[3] = connectionPool.getConnection();
-                } catch (DaoException e) {
-                    e.printStackTrace();
+        );
+        Thread threadB = new Thread(
+                () -> {
+                    try {
+                        connections[2] = connectionPool.getConnection();
+                        connections[3] = connectionPool.getConnection();
+                    } catch (DaoException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
 
         threadA.start();
         threadA.join();
@@ -110,44 +97,35 @@ public class ConcurrentConnectionPoolTest {
         Assert.assertEquals(connections[0], connections[1]);
         Assert.assertEquals(connections[0], connections[2]);
         Assert.assertEquals(connections[0], connections[3]);
-
-        for (Connection c : connections) {
-            connectionPool.recycle(c);
-            if (!c.isClosed()) {
-                c.close();
-            }
-        }
     }
 
     @Test
     public void doubleRecycle() throws InterruptedException, SQLException, DaoException {
         final Connection[] connections = new Connection[2];
-        Thread threadA = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[0] = connectionPool.getConnection();
-                    connectionPool.recycle(connections[0]);
-                    Thread.sleep(2000);
-                    connectionPool.recycle(connections[0]);
-                } catch (DaoException | InterruptedException e) {
-                    e.printStackTrace();
+        Thread threadA = new Thread(
+                () -> {
+                    try {
+                        connections[0] = connectionPool.getConnection();
+                        connectionPool.recycle(connections[0]);
+                        Thread.sleep(2000);
+                        connectionPool.recycle(connections[0]);
+                    } catch (DaoException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        Thread threadB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                    connections[1] = connectionPool.getConnection();
-                    Thread.sleep(3000);
-                    connectionPool.recycle(connections[1]);
-                } catch (DaoException | InterruptedException e) {
-                    e.printStackTrace();
+        );
+        Thread threadB = new Thread(
+                () -> {
+                    try {
+                        Thread.sleep(1000);
+                        connections[1] = connectionPool.getConnection();
+                        Thread.sleep(3000);
+                        connectionPool.recycle(connections[1]);
+                    } catch (DaoException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
 
         threadA.start();
         threadB.start();
@@ -155,54 +133,44 @@ public class ConcurrentConnectionPoolTest {
         threadA.join();
 
         Assert.assertEquals(connections[0], connections[1]);
-
-        for (Connection c : connections) {
-            connectionPool.recycle(c);
-            if (!c.isClosed()) {
-                c.close();
-            }
-        }
     }
 
     @Test
     public void takeAllConnections() throws InterruptedException, SQLException, DaoException {
         final Connection[] connections = new Connection[3];
-        Thread threadA = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[0] = connectionPool.getConnection();
-                    Thread.sleep(5000);
-                    connectionPool.recycle(connections[0]);
-                } catch (DaoException | InterruptedException e) {
-                    e.printStackTrace();
+        Thread threadA = new Thread(
+                () -> {
+                    try {
+                        connections[0] = connectionPool.getConnection();
+                        Thread.sleep(2000);
+                        connectionPool.recycle(connections[0]);
+                    } catch (DaoException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        Thread threadB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    connections[1] = connectionPool.getConnection();
-                    Thread.sleep(6000);
-                    connectionPool.recycle(connections[1]);
-                } catch (DaoException | InterruptedException e) {
-                    e.printStackTrace();
+        );
+        Thread threadB = new Thread(
+                () -> {
+                    try {
+                        connections[1] = connectionPool.getConnection();
+                        Thread.sleep(3000);
+                        connectionPool.recycle(connections[1]);
+                    } catch (DaoException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
-        Thread threadC = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(1000);
-                    connections[2] = connectionPool.getConnection();
-                    connectionPool.recycle(connections[2]);
-                } catch (DaoException | InterruptedException e) {
-                    e.printStackTrace();
+        );
+        Thread threadC = new Thread(
+                () -> {
+                    try {
+                        Thread.sleep(1000);
+                        connections[2] = connectionPool.getConnection();
+                        connectionPool.recycle(connections[2]);
+                    } catch (DaoException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
 
         threadA.start();
         threadB.start();
@@ -212,12 +180,5 @@ public class ConcurrentConnectionPoolTest {
         threadC.join();
 
         Assert.assertEquals(connections[0], connections[2]);
-
-        for (Connection c : connections) {
-            connectionPool.recycle(c);
-            if (!c.isClosed()) {
-                c.close();
-            }
-        }
     }
 }
