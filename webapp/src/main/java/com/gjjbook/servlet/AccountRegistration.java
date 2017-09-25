@@ -1,11 +1,12 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/account_registration")
+@MultipartConfig(maxFileSize = 1_617_721)
 public class AccountRegistration extends RegisterUpdateAccount {
 
     @Override
@@ -24,13 +26,12 @@ public class AccountRegistration extends RegisterUpdateAccount {
         AccountService service;
         try {
             if (serviceAttribute == null) {
-                service = new AccountService();
+                service = accountService;
                 session.setAttribute("accountService", service);
             } else {
                 service = (AccountService) serviceAttribute;
             }
             service.create(account);
-            service.setPassword(account, req.getParameter("password"));
         } catch (ServiceException e) {
             throw new ServletException(e);
         }

@@ -1,8 +1,8 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,7 +30,7 @@ public class EditAccountServlet extends HttpServlet {
                 } else {
                     req.setAttribute("account", account);
                     req.setAttribute("avatar", service.getEncodedAvatar(account));
-                    req.setAttribute("password", service.getPassword(account));
+//                    req.setAttribute("password", service.getPassword(account));
                 }
             } catch (ServiceException e) {
                 throw new ServletException(e);

@@ -18,45 +18,42 @@
 <body>
 <div class="fixed-centered container">
     <div class="row row-top">
-        <div class="col-xs-2">
-            <ul class="list-group">
-                <li>
-                    <a class="list-group-item"
-                       href="<c:url value="/account?id=${loggedUser.id}"/>"><span
-                            class="glyphicon glyphicon-home" style="margin-right: 10px"></span>
-                        My page</a>
-                </li>
-                <li>
-                    <a class="list-group-item" href="#"><span
-                            class="glyphicon glyphicon-envelope" style="margin-right: 10px"></span>
-                        Messages</a>
-                </li>
-                <li>
-                    <a class="list-group-item" href="#"><span
-                            class="glyphicon glyphicon-th-large" style="margin-right: 10px"></span>
-                        Groups</a>
-                </li>
-            </ul>
-        </div>
-        <div class="col-xs-3">
-            <div class="row">
-                <div class="col-xs-12 col-left" align="center">
-                    <div class="well">
-                        <img width="100%" alt="Avatar"
-                             src="data:image/jpeg;base64,${avatar}"/><br/><br/>
-                        <form method="post" action="/updateavatar" enctype="multipart/form-data">
+        <form method="post" action="/updateaccount" enctype="multipart/form-data">
+            <div class="col-xs-2">
+                <ul class="list-group">
+                    <li>
+                        <a class="list-group-item"
+                           href="<c:url value="/account?id=${loggedUser.id}"/>"><span
+                                class="glyphicon glyphicon-home" style="margin-right: 10px"></span>
+                            My page</a>
+                    </li>
+                    <li>
+                        <a class="list-group-item" href="#"><span
+                                class="glyphicon glyphicon-envelope" style="margin-right: 10px"></span>
+                            Messages</a>
+                    </li>
+                    <li>
+                        <a class="list-group-item" href="#"><span
+                                class="glyphicon glyphicon-th-large" style="margin-right: 10px"></span>
+                            Groups</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-3">
+                <div class="row">
+                    <div class="col-xs-12 col-left" align="center">
+                        <div class="well">
+                            <img width="100%" alt="Avatar"
+                                 src="data:image/jpeg;base64,${avatar}"/><br/><br/>
                             Select a file: <input type="file" name="avatar">
-                            <input type="submit" class="btn btn-block" value="Upload">
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xs-7">
-            <div class="row">
-                <div class="col-xs-12 col-right">
-                    <div class="well">
-                        <form method="post" action="/updateaccount">
+            <div class="col-xs-7">
+                <div class="row">
+                    <div class="col-xs-12 col-right">
+                        <div class="well">
                             <input type="hidden" name="id" value="${account.id}">
                             <table class="table">
                                 <tbody>
@@ -115,7 +112,7 @@
                                 </c:forEach>
                                 <tr>
                                     <td>Home address:</td>
-                                    <td>${account.additionalInfo}</td>
+                                    <td><input type="text" name="home_address" value="${account.homeAddress}"></td>
                                 </tr>
                                 <tr>
                                     <td>Work address:</td>
@@ -140,18 +137,19 @@
                                 </tr>
                                 <tr>
                                     <td>Password:</td>
-                                    <td><input type="password" name="password" value="${password}"
+                                    <td><input type="password" name="password" value=""
                                                required></td>
                                 </tr>
                                 </tbody>
                             </table>
                             <input type="submit" value="Confirm changes" class="btn btn-block">
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
+
 </div>
 </body>
 </html>

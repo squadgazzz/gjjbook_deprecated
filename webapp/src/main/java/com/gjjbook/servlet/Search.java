@@ -1,8 +1,8 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

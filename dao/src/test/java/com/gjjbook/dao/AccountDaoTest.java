@@ -1,55 +1,57 @@
 package com.gjjbook.dao;
 
-import com.gjjbook.dao.connectionPool.ConcurrentConnectionPool;
-import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Account;
-import com.gjjbook.domain.Phone;
-import com.gjjbook.domain.PhoneType;
 import com.gjjbook.domain.Sex;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import javax.sql.DataSource;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = {"classpath:dao-context.xml", "classpath:dao-context-overrides.xml"})
 public class AccountDaoTest {
-    private ConnectionPool connectionPool;
-    private GenericDao<Account, Integer> accountDao;
 
-    public AccountDaoTest() throws DaoException {
-    }
+    @Autowired
+    private AccountDao accountDao;
+    @Autowired
+    private DataSource dataSource;
+    // done: 20.09.2017 убрать поле с коннекшеном
+
+    // done: 20.09.2017 автовайрить датосорс вместо темплейта
 
     @Before
     public void setUp() throws Exception, DaoException {
-        connectionPool = ConcurrentConnectionPool.getInstance();
-        accountDao = new AccountDao(connectionPool);
-        Connection connection = connectionPool.getConnection();
+        Connection connection = dataSource.getConnection();
         FileReader fr = new FileReader("src/test/resources/createAccounts.sql");
         RunScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createPhones.sql");
         RunScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createFriends.sql");
         RunScript.execute(connection, fr);
-        connectionPool.recycle(connection);
+        fr = new FileReader("src/test/resources/createEmailPassword.sql");
+        RunScript.execute(connection, fr);
+        connection.close();
     }
 
     @After
     public void tearDown() throws Exception, DaoException {
+        Connection connection = dataSource.getConnection();
         FileReader fr = new FileReader("src/test/resources/dropDb.sql");
-        RunScript.execute(connectionPool.getConnection(), fr);
-        connectionPool.close();
-    }
-
-    @Test
-    public void getContext() throws Exception, DaoException {
-        Assert.assertNotNull(connectionPool);
+        RunScript.execute(connection, fr);
+        connection.close();
     }
 
     @Test
@@ -69,6 +71,7 @@ public class AccountDaoTest {
         Account newAcc = createTestAccount();
 
         Assert.assertEquals(newAcc, accountDao.getByPK(1));
+
     }
 
     @Test
@@ -98,15 +101,10 @@ public class AccountDaoTest {
     }
 
     private Account createTestAccount(String email) throws DaoException {
-        Phone phoneA = new Phone(PhoneType.HOME, "4959998877");
-        Phone phoneB = new Phone(PhoneType.WORK, "4951112233");
-        List<Phone> phones = new LinkedList<>();
-        phones.add(phoneA);
-        phones.add(phoneB);
-
-        Account account = new Account("ivan", null, "ivanov",
+        byte[] avatar = {1, 2, 3};
+        Account account = new Account(avatar, "ivan", null, "ivanov",
                 Sex.MALE, LocalDate.of(2000, 10, 20),
-                phones, "home", "work",
+                null, "home", "work",
                 email, "7894", "skype",
                 null, null, null);
 

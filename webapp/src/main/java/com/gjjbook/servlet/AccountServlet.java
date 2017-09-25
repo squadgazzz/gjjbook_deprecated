@@ -1,18 +1,17 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet("/account")
-public class AccountServlet extends HttpServlet {
+public class AccountServlet extends AbstractServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -22,7 +22,7 @@
         </div>
         <div class="col-xs-6">
             <div class="well">
-                <form method="post" action="/account_registration">
+                <form method="post" action="/account_registration" enctype="multipart/form-data">
                     <table class="table">
                         <tbody>
                         <tr>

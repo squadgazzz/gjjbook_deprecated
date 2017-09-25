@@ -8,11 +8,13 @@
         <junit.version>4.12</junit.version>
         <mysql.version>5.1.42</mysql.version>
         <h2.version>1.4.196</h2.version>
+        <dbcp2.version>2.1.1</dbcp2.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <jstl.version>1.2</jstl.version>
         <bootstrap.version>3.3.7</bootstrap.version>
         <jquery.version>3.2.1</jquery.version>
         <jbcrypt.version>0.4</jbcrypt.version>
+        <spring.version>4.3.10.RELEASE</spring.version>
     </properties>
 
     <groupId>com.gjjbook</groupId>

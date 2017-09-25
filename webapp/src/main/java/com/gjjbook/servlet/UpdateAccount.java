@@ -1,18 +1,21 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Map;
 
 @WebServlet("/updateaccount")
+@MultipartConfig(maxFileSize = 1_617_721)
 public class UpdateAccount extends RegisterUpdateAccount {
 
     @Override
@@ -26,10 +29,6 @@ public class UpdateAccount extends RegisterUpdateAccount {
             try {
                 parseAccountData(req, account);
                 service.update(account);
-                String password = req.getParameter("password");
-                if (password != null && password.length() > 0) {
-                    service.setPassword(account, req.getParameter("password"));
-                }
                 updateCookies(req, account, service);
             } catch (ServiceException e) {
                 throw new ServletException(e);

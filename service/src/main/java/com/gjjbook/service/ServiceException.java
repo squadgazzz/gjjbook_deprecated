@@ -1,4 +1,4 @@
-package com.gjjbook;
+package com.gjjbook.service;
 
 public class ServiceException extends Throwable {
 

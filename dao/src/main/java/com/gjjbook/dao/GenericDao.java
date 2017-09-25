@@ -1,5 +1,7 @@
 package com.gjjbook.dao;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -15,9 +17,9 @@ public interface GenericDao<T, PK> {
 
     T getByPK(PK key) throws DaoException;
 
-    void update(T object) throws DaoException;
+    boolean update(T object) throws DaoException;
 
-    void delete(T object) throws DaoException;
+    boolean delete(T object) throws DaoException;
 
     List<T> getAll() throws DaoException;
 }

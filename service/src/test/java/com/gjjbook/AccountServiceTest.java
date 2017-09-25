@@ -1,11 +1,12 @@
 package com.gjjbook;
 
+import com.gjjbook.dao.AccountDao;
 import com.gjjbook.dao.DaoException;
-import com.gjjbook.dao.GenericDao;
-import com.gjjbook.dao.connectionPool.ConnectionPool;
-import com.gjjbook.dao.factory.DaoFactory;
+import com.gjjbook.dao.PhoneDao;
 import com.gjjbook.domain.Account;
-import org.junit.After;
+import com.gjjbook.domain.Phone;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,36 +23,25 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountServiceTest {
-
     @Mock
     private Account account;
 
     @Mock
-    private GenericDao<Account, Integer> accountDao;
+    private Phone phone;
 
     @Mock
-    private DaoFactory<ConnectionPool> factory;
+    private AccountDao accountDao;
 
     @Mock
-    private ConnectionPool connectionPool;
-
-    @Mock
-    private Connection connection;
+    private PhoneDao phoneDao;
 
     @InjectMocks
     private AccountService accountService;
 
     @Before
     public void setUp() throws Exception, ServiceException, DaoException {
-        accountService = new AccountService(factory, accountDao);
+        accountService = new AccountService(accountDao, phoneDao);
         when(accountDao.create(new Account())).thenReturn(account);
-        when(factory.getContext()).thenReturn(connectionPool);
-        when(connectionPool.getConnection()).thenReturn(connection);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        accountService.close();
     }
 
     @Test
@@ -83,6 +72,9 @@ public class AccountServiceTest {
     @Test
     public void getByPk() throws Exception, DaoException, ServiceException {
         when(accountDao.getByPK(1)).thenReturn(account);
+        List<Phone> phoneList = new ArrayList<>();
+        phoneList.add(phone);
+        when(phoneDao.getPhonesByAccountId(1)).thenReturn(phoneList);
 
         assertEquals(account, accountService.getByPk(1));
         assertNotEquals(mock(Account.class), accountService.getByPk(1));
@@ -136,19 +128,5 @@ public class AccountServiceTest {
 
         verify(accountDao).update(friendOne);
         verify(accountDao).update(friendTwo);
-    }
-
-    @Test
-    public void getFriends() throws Exception {
-        accountService.getFriends(account);
-
-        verify(account).getFriendList();
-    }
-
-    @Test
-    public void close() throws Exception {
-        accountService.close();
-
-        verify(factory).close();
     }
 }

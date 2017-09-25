@@ -1,17 +1,20 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.AccountService;
-import com.gjjbook.ServiceException;
 import com.gjjbook.domain.Account;
+import com.gjjbook.service.AccountService;
+import com.gjjbook.service.ServiceException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/login_authenticate")
-public class LoginAuthenticate extends HttpServlet {
+public class LoginAuthenticate extends AbstractServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -37,7 +40,7 @@ public class LoginAuthenticate extends HttpServlet {
             try {
                 AccountService service = (AccountService) session.getAttribute("accountService");
                 if (service == null) {
-                    service = new AccountService();
+                    service = accountService;
                     session.setAttribute("accountService", service);
                 }
                 if (service.isPasswordMatch(email, password, isEncrypted)) {

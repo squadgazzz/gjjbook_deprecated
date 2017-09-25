@@ -1,20 +1,55 @@
 package com.gjjbook.dao;
 
-import com.gjjbook.dao.connectionPool.ConnectionPool;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
+@Repository
+public class PhoneDao extends AbstractJdbcDao<Phone, Integer> {
 
-    public PhoneDao(ConnectionPool connectionPool) {
-        super(connectionPool);
+    public PhoneDao() {
+    }
+
+    @Autowired
+    public PhoneDao(JdbcTemplate jdbcTemplate) {
+        super(jdbcTemplate);
+    }
+
+    @Override
+    public Phone create(Phone phone) throws DaoException {
+        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+        jdbcInsert.withTableName("Phones").usingGeneratedKeyColumns("id");
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("Accounts_id", phone.getOwnerId());
+        params.put("type", phone.getType().name());
+        params.put("number", phone.getNumber());
+
+        Integer key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(params)).intValue();
+
+        return getByPK(key);
+    }
+
+    @Override
+    public boolean update(Phone phone) throws DaoException {
+        return jdbcTemplate.update(getUpdateQuery(), phone.getOwnerId(),
+                phone.getType().name(), phone.getNumber(), phone.getId()) > 0;
+    }
+
+    @Override
+    public List<Phone> getAll() throws DaoException {
+        return jdbcTemplate.query(getSelectQuery(), new BeanPropertyRowMapper<>(Phone.class));
     }
 
     @Override
@@ -22,7 +57,6 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
         return "SELECT * FROM Phones";
     }
 
-    @Override
     protected String getCreateQuery() {
         return "INSERT INTO Phones (Accounts_id, type, number) " +
                 "VALUES (?, ?, ?)";
@@ -39,92 +73,23 @@ public class PhoneDao extends AbstractAutoIncrementIdDao<Phone, Integer> {
         return "DELETE FROM Phones" + getWhereByPKQuery();
     }
 
+    @Override
+    protected Phone parseResultSet(ResultSet rs) throws DaoException {
+        Phone phone = new Phone();
+        try {
+            phone.setId(rs.getInt("id"));
+            phone.setOwnerId(rs.getInt("Accounts_id"));
+            phone.setNumber(rs.getString("number"));
+            phone.setType(PhoneType.valueOf(rs.getString("type")));
+        } catch (SQLException e) {
+            throw new DaoException(e);
+        }
+
+        return phone;
+    }
+
     public List<Phone> getPhonesByAccountId(int id) throws DaoException {
-        List<Phone> list;
-        String sql = getSelectQuery();
-        sql += " WHERE Accounts_id = ?";
-        Connection connection = connectionPool.getConnection();
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, id);
-            ResultSet rs = statement.executeQuery();
-            list = parseResultSet(rs);
-        } catch (Exception e) {
-            throw new DaoException(e);
-        }
-
-        if (list == null || list.size() == 0) {
-            return null;
-        }
-
-        return list;
-    }
-
-    @Override
-    protected List<Phone> parseResultSet(ResultSet rs) throws DaoException {
-        List<Phone> result = new LinkedList<>();
-        try {
-            while (rs.next()) {
-                PersistPhone phone = new PersistPhone();
-                phone.setId(rs.getInt("id"));
-                phone.setOwnerId(rs.getInt("Accounts_id"));
-                phone.setNumber(rs.getString("number"));
-                phone.setType(PhoneType.valueOf(rs.getString("type")));
-                result.add(phone);
-            }
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-        return result;
-    }
-
-    @Override
-    protected void prepareStatementForInsert(PreparedStatement statement, Phone object) throws DaoException {
-        try {
-            statement.setInt(1, object.getOwnerId());
-            statement.setString(2, object.getType().name());
-            statement.setString(3, object.getNumber());
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    @Override
-    protected void prepareStatementForUpdate(PreparedStatement statement, Phone object) throws DaoException {
-        try {
-            prepareStatementForInsert(statement, object);
-            statement.setInt(5, object.getId());
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    @Override
-    protected void prepareStatementForDelete(PreparedStatement statement, Phone object) throws SQLException {
-        statement.setInt(1, object.getId());
-    }
-
-    @Override
-    protected void prepareStatementForGet(PreparedStatement statement, Integer key) throws DaoException {
-        try {
-            statement.setInt(1, key);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-    }
-
-    @Override
-    protected void collectForeignData(Phone object) {
-// nothing to collect yet
-    }
-
-    @Override
-    protected void fillForeignData(Phone object, int id) {
-// nothing to collect yet
-    }
-
-    private class PersistPhone extends Phone {
-        public void setId(int id) {
-            super.setId(id);
-        }
+        String sql = getSelectQuery() + " WHERE Accounts_id = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Phone.class), id);
     }
 }

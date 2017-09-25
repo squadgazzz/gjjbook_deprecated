@@ -5,6 +5,7 @@ import java.util.List;
 
 public class Account implements Identified<Integer> {
     private int id;
+    private byte[] avatar;
     private String name;
     private String middleName;
     private String surName;
@@ -18,12 +19,13 @@ public class Account implements Identified<Integer> {
     private String skype;
     private String additionalInfo;
     private List<Account> friendList;
-    private List<Group> groupList;
+    private String password;
 
     public Account() {
     }
 
-    public Account(String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, List<Group> groupList) {
+    public Account(byte[] avatar, String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, String password) {
+        this.avatar = avatar;
         this.name = name;
         this.middleName = middleName;
         this.surName = surName;
@@ -37,15 +39,23 @@ public class Account implements Identified<Integer> {
         this.skype = skype;
         this.additionalInfo = additionalInfo;
         this.friendList = friendList;
-        this.groupList = groupList;
+        this.password = password;
     }
 
     public Integer getId() {
         return id;
     }
 
-    protected void setId(int id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public byte[] getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(byte[] avatar) {
+        this.avatar = avatar;
     }
 
     public String getName() {
@@ -152,12 +162,12 @@ public class Account implements Identified<Integer> {
         this.friendList = friendList;
     }
 
-    public List<Group> getGroupList() {
-        return groupList;
+    public String getPassword() {
+        return password;
     }
 
-    public void setGroupList(List<Group> groupList) {
-        this.groupList = groupList;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override

@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `Accounts` (
   `icq` VARCHAR(45) NULL,
   `skype` VARCHAR(45) NULL,
   `additionalinfo` VARCHAR(45) NULL,
+  `avatar` MEDIUMBLOB NULL,
   PRIMARY KEY (`id`, `email`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
