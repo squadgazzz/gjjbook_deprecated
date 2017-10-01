@@ -1,0 +1,5 @@
+com\gjjbook\domain\Account.class
+com\gjjbook\domain\Identified.class
+com\gjjbook\domain\PhoneType.class
+com\gjjbook\domain\Phone.class
+com\gjjbook\domain\Sex.class

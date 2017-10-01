@@ -83,3 +83,15 @@ body {
     padding-left: 0;
     padding-right: 0;
 }
+
+.modal-dialog {
+    top: 30%;
+}
+
+#birth_date {
+    padding-right: 0;
+}
+
+#phone_type option {
+    background-color: #4dff58;
+}

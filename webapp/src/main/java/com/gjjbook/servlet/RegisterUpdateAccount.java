@@ -54,6 +54,7 @@ public abstract class RegisterUpdateAccount extends AbstractServlet {
         for (int i = 0; i < phoneNumbers.length; i++) {
             newPhones.add(new Phone(PhoneType.valueOf(phoneTypes[i]), phoneNumbers[i]));
         }
+
         return newPhones;
     }
 

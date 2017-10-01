@@ -43,8 +43,8 @@ public class PhoneDao extends AbstractJdbcDao<Phone, Integer> {
 
     @Override
     public boolean update(Phone phone) throws DaoException {
-        return jdbcTemplate.update(getUpdateQuery(), phone.getOwnerId(),
-                phone.getType().name(), phone.getNumber(), phone.getId()) > 0;
+        return jdbcTemplate.update(getUpdateQuery(), phone.getType().name(),
+                phone.getNumber(), phone.getId()) > 0;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PhoneDao extends AbstractJdbcDao<Phone, Integer> {
 
     @Override
     protected String getUpdateQuery() {
-        return "UPDATE Phones SET Accounts_id= ?, type= ?, number= ? " +
+        return "UPDATE Phones SET type= ?, number= ? " +
                 getWhereByPKQuery();
     }
 

@@ -65,7 +65,18 @@ public class AccountService implements Serviceable<Account, Integer> {
                 if (phones.size() > 0) {
                     for (Phone p : phones) {
                         p.setOwnerId(id);
-                        if (phonesFromDb == null || !phonesFromDb.contains(p)) {
+                        if (phonesFromDb != null || phonesFromDb.size() > 0) {
+                            int index = phonesFromDb.indexOf(p);
+                            if (index < 0) {
+                                phoneDao.create(p);
+                            } else {
+                                Phone oldPhone = phonesFromDb.get(index);
+                                if (!p.getType().equals(oldPhone.getType())) {
+                                    oldPhone.setType(p.getType());
+                                    phoneDao.update(oldPhone);
+                                }
+                            }
+                        } else {
                             phoneDao.create(p);
                         }
                     }
