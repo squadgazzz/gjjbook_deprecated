@@ -15,10 +15,9 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro">
     <link rel="stylesheet" type="text/css"
           href="<c:url value="/webjars/bootstrap/3.3.7/css/bootstrap.css"/>"/>
-    <style>
-        <%@include file="/CSS/header.css" %>
-        <%@include file="/CSS/main.css" %>
-    </style>
+
+    <link rel="stylesheet" href="<c:url value="/CSS/main.css" />">
+    <link rel="stylesheet" href="<c:url value="/CSS/header.css" />">
 
     <script src="<c:url value="/webjars/jquery/3.2.1/jquery.min.js"/>"></script>
     <script src="<c:url value="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"/>"></script>

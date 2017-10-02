@@ -10,17 +10,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
-    <style>
-        <%@include file="/CSS/body.css" %>
-    </style>
+    <%--сделать кеширование css\js, проверить, что это будет работать через томкат из cmd--%>
     <link rel="stylesheet" href="<c:url value="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <script>
-        <%@include file="/JS/editAccount.js"%>
-    </script>
+    <script src="<c:url value="/JS/editAccount.js" />"></script>
+    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
 </head>
 <body>
 <div class="fixed-centered container">
@@ -125,7 +122,8 @@
                                 <c:if test="${not empty phone}">
                                     <div class="form-group phone has-feedback">
                                         <label class="col-sm-3">
-                                            <select style="padding-right: 0;" id="phone_type" class="form-control" name="phone_type">
+                                            <select style="padding-right: 0;" id="phone_type" class="form-control"
+                                                    name="phone_type">
                                                 <c:forEach var="type" items="<%= PhoneType.values() %>">
                                                     <option id="${phone.id}"
                                                             <c:if test="${phone.type == type}">
@@ -226,7 +224,8 @@
                                 <label class="control-label col-sm-3" for="password">Password*:</label>
                                 <div class="col-sm-9">
                                     <input class="form-control" id="password" type="password" name="password"
-                                           value="${account.password}" required="required" data-minlength="6" data-maxlenmgth="40">
+                                           value="${account.password}" required="required" data-minlength="6"
+                                           data-maxlenmgth="40">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
                                 </div>

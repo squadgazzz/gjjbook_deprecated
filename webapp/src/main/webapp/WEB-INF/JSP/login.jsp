@@ -10,8 +10,8 @@
 <html>
 <head>
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
     <style>
-        <%@include file="/CSS/body.css" %>
         img.back {
             position: absolute;
             margin: auto;
