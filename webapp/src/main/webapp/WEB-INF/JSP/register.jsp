@@ -34,38 +34,38 @@
                         </tr>
                         <tr>
                             <td>Name:</td>
-                            <td><input type="text" name="name" placeholder="Name" required></td>
+                            <td><input type="text" id="name" name="name" placeholder="Name" required></td>
                         </tr>
                         <tr>
                             <td>Middle name:</td>
-                            <td><input type="text" name="middle_name" placeholder="Middle name"></td>
+                            <td><input type="text" id="middleName" name="middleMame" placeholder="Middle name"></td>
                         </tr>
                         <tr>
                             <td>Surname:</td>
-                            <td><input type="text" name="surname" placeholder="Surname" required></td>
+                            <td><input type="text" id="surName" name="surName" placeholder="Surname" required></td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="gender" checked value="MALE"> Male
-                                <input type="radio" name="gender" value="FEMALE"> Female
+                            <td><input type="radio" name="sex" checked value="MALE"> Male
+                                <input type="radio" name="sex" value="FEMALE"> Female
                             </td>
                             <td></td>
                         </tr>
                         <tr>
                             <td>Birth date:</td>
-                            <td><input type="date" name="birth_date" required></td>
+                            <td><input type="date" id="birthDate" name="birthDate" required></td>
                         </tr>
                         <tr>
                             <td>
-                                <select name="phone_type">
-                                    <c:forEach var="type" items="<%= PhoneType.values() %>">
-                                        <option <c:if test="${type=='MOBILE'}"> selected</c:if>
-                                                value="${type}"> ${type} </option>
+                                <select id="type" name="type">
+                                    <c:forEach var="phoneType" items="<%= PhoneType.values() %>">
+                                        <option <c:if test="${phoneType=='MOBILE'}"> selected</c:if>
+                                                value="${phoneType}"> ${phoneType} </option>
                                     </c:forEach>
                                 </select>
                                 phone:
                             </td>
                             <td>
-                                <input type="text" name="phone" placeholder="X-XXX-XXX-XX-XX">
+                                <input type="text" id="number" name="number" placeholder="X-XXX-XXX-XX-XX">
                             </td>
                         </tr>
                         </tbody>
@@ -79,56 +79,5 @@
     </div>
 
 </div>
-<%--<div class="column-left"></div>
-<div class="column-center">
-    <h2>Register form</h2>
-    <form action="/account_registration" method="post">
-        Name: <input type="text" name="name" required>
-        <br/>
-        Middle name: <input type="text" name="middle_name">
-        <br/>
-        Surname: <input type="text" name="surname" required>
-        <br/>
-        <input type="radio" checked name="gender" value="MALE"> Male
-        <input type="radio" checked name="gender" value="FEMALE"> Female
-        <br/>
-        Birth date: <input type="date" name="birth_date" required>
-        <br/>
-        <select name="phone_type">
-            <c:forEach var="type" items="<%= PhoneType.values()%>">
-                <option value="${type}">${type}</option>
-            </c:forEach>
-        </select> phone: <input type="number" name="phone">
-        <br/>
-        <select name="phone_type">
-            <c:forEach var="type" items="<%= PhoneType.values()%>">
-                <option value="${type}">${type}</option>
-            </c:forEach>
-        </select> phone: <input type="number" name="phone">
-        <br/>
-        <select name="phone_type">
-            <c:forEach var="type" items="<%= PhoneType.values()%>">
-                <option value="${type}">${type}</option>
-            </c:forEach>
-        </select> phone: <input type="number" name="phone">
-        <br/>
-        Home address: <input type="text" name="home_address">
-        <br/>
-        Work address: <input type="text" name="work_address">
-        <br/>
-        email: <input type="email" name="email" required>
-        <br/>
-        icq: <input type="number" name="icq">
-        <br/>
-        skype: <input type="text" name="skype">
-        <br/>
-        Additional info: <textarea name="additional_info" rows="10" cols="30"></textarea>
-        <br/>
-        Password: <input type="password" name="password" required>
-        <br/>
-        <input type="submit" value="Confirm">
-    </form>
-</div>
-<div class="column-right"></div>--%>
 </body>
 </html>

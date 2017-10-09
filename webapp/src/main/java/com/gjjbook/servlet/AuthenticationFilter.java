@@ -1,9 +1,5 @@
 package com.gjjbook.servlet;
 
-import com.gjjbook.service.AccountService;
-import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.Cookie;
@@ -14,11 +10,9 @@ import java.io.IOException;
 
 @WebFilter("/*")
 public class AuthenticationFilter implements Filter {
-    private ServletContext servletContext;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-        servletContext = filterConfig.getServletContext();
     }
 
     @Override
@@ -53,7 +47,6 @@ public class AuthenticationFilter implements Filter {
                 }
                 if (email != null && password != null) {
                     HttpSession session = req.getSession();
-                    checkAccountService(session);
                     req.setAttribute("email", email);
                     req.setAttribute("password", password);
                     req.setAttribute("path", path);
@@ -65,13 +58,6 @@ public class AuthenticationFilter implements Filter {
             }
         } else {
             filterChain.doFilter(req, res);
-        }
-    }
-
-    private void checkAccountService(HttpSession session) throws ServletException {
-        if (session.getAttribute("accountService") == null) {
-            ApplicationContext appContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-            session.setAttribute("accountService", appContext.getBean(AccountService.class));
         }
     }
 

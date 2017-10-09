@@ -1,5 +1,6 @@
 <%@ page import="com.gjjbook.domain.PhoneType" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%--
   Created by IntelliJ IDEA.
   User: IZhavoronkov
@@ -11,20 +12,19 @@
 <html>
 <head>
     <%--сделать кеширование css\js, проверить, что это будет работать через томкат из cmd--%>
-    <link rel="stylesheet" href="<c:url value="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>">
+    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <script src="<c:url value="/JS/editAccount.js" />"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <script src="<c:url value="/JS/editAccount.js" />"></script>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <link rel="stylesheet" href="<c:url value="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>">
     <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
 </head>
 <body>
 <div class="fixed-centered container">
     <div class="row row-top">
-        <form class="form-horizontal" role="form" data-toggle="validator" name="main_form" method="post"
-              action="/updateaccount"
-              enctype="multipart/form-data">
+        <form class="form-horizontal" id="submit" role="form" data-toggle="validator" name="main_form" method="post"
+              action="/updateaccount" enctype="multipart/form-data">
             <div class="col-xs-2">
                 <ul class="list-group">
                     <li>
@@ -51,7 +51,7 @@
                         <div class="well">
                             <img width="100%" alt="Avatar"
                                  src="data:image/jpeg;base64,${avatar}"/><br/><br/>
-                            <input type="file" name="avatar" class="file">
+                            <input type="file" id="avatar" name="avatar" class="file">
                         </div>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                 <div class="row">
                     <div class="col-xs-12 col-right">
                         <div class="well">
-                            <input type="hidden" name="id" value="${account.id}">
+                            <input type="hidden" id="id" name="id" value="${account.id}">
                             <div class="form-group has-feedback">
                                 <label class="control-label col-sm-3" for="name">Name*:</label>
                                 <div class="col-sm-9">
@@ -74,9 +74,9 @@
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="middle_name">Middle Name:</label>
+                                <label class="control-label col-sm-3" for="middleName">Middle Name:</label>
                                 <div class="col-sm-9">
-                                    <input class="form-control" id="middle_name" type="text" name="middle_name"
+                                    <input class="form-control" id="middleName" type="text" name="middleName"
                                            value="${account.middleName}" pattern="^[_A-z]{1,}$"
                                            data-pattern-error="Only A-Z allowed" data-maxlength="40">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
@@ -85,9 +85,9 @@
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="surname">Surname*:</label>
+                                <label class="control-label col-sm-3" for="surName">Surname*:</label>
                                 <div class="col-sm-9">
-                                    <input class="form-control" id="surname" type="text" name="surname"
+                                    <input class="form-control" id="surName" type="text" name="surName"
                                            value="${account.surName}" data-error="Surname is required"
                                            required="required" pattern="^[_A-z]{1,}$"
                                            data-pattern-error="Only A-Z allowed" data-maxlength="40">
@@ -99,18 +99,18 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-3" for="surname">Gender*:</label>
                                 <div class="col-sm-9">
-                                    <input type="radio" name="gender"
+                                    <input type="radio" name="sex"
                                            <c:if test="${account.sex=='MALE'}">checked</c:if> value="MALE"> Male
-                                    <input type="radio" name="gender"
+                                    <input type="radio" name="sex"
                                            <c:if test="${account.sex=='FEMALE'}">checked</c:if> value="FEMALE">
                                     Female
                                 </div>
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="birth_date">Birth date*:</label>
+                                <label class="control-label col-sm-3" for="birthDate">Birth date*:</label>
                                 <div class="col-sm-3">
-                                    <input class="form-control" id="birth_date" type="text" name="birth_date"
+                                    <input class="form-control" id="birthDate" type="text" name="birthDate"
                                            value="${account.birthDate}" required="required"
                                            data-minlength="10" data-maxlength="10">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
@@ -122,22 +122,22 @@
                                 <c:if test="${not empty phone}">
                                     <div class="form-group phone has-feedback">
                                         <label class="col-sm-3">
-                                            <select style="padding-right: 0;" id="phone_type" class="form-control"
-                                                    name="phone_type">
-                                                <c:forEach var="type" items="<%= PhoneType.values() %>">
+                                            <select style="padding-right: 0;" id="type" class="form-control"
+                                                    name="type">
+                                                <c:forEach var="phoneType" items="<%= PhoneType.values() %>">
                                                     <option id="${phone.id}"
-                                                            <c:if test="${phone.type == type}">
+                                                            <c:if test="${phone.type == phoneType}">
                                                                 selected
                                                             </c:if>
-                                                            value="${type}">
-                                                            ${type}
+                                                            value="${phoneType}">
+                                                            ${phoneType}
                                                     </option>
                                                 </c:forEach>
                                             </select>
                                         </label>
 
                                         <div class="col-sm-6">
-                                            <input class="form-control" type="text" name="phone" id="${phone.id}"
+                                            <input class="form-control" type="text" name="number" id="${phone.id}"
                                                    value="${phone.number}" required="required" data-minlength="18"
                                                    data-maxlength="18" data-pattern-error="Only digits. Length 10.">
                                             <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
@@ -159,11 +159,10 @@
                                 </c:if>
                             </c:forEach>
 
-
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="home_address">Home address:</label>
+                                <label class="control-label col-sm-3" for="homeAddress">Home address:</label>
                                 <div class="col-sm-9">
-                                    <input class="form-control" id="home_address" type="text" name="home_address"
+                                    <input class="form-control" id="homeAddress" type="text" name="homeAddress"
                                            value="${account.homeAddress}" data-maxlength="100">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
@@ -171,9 +170,9 @@
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="work_address">Work address:</label>
+                                <label class="control-label col-sm-3" for="workAddress">Work address:</label>
                                 <div class="col-sm-9">
-                                    <input class="form-control" id="work_address" type="text" name="work_address"
+                                    <input class="form-control" id="workAddress" type="text" name="workAddress"
                                            value="${account.workAddress}" data-maxlength="100">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
@@ -201,10 +200,10 @@
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="additional_info">Additional info:</label>
+                                <label class="control-label col-sm-3" for="additionalInfo">Additional info:</label>
                                 <div class="col-sm-9">
-                                    <textarea rows="10" class="form-control" id="additional_info" name="additional_info"
-                                              value="${account.additionalInfo}" data-maxlength="300"></textarea>
+                                    <textarea rows="10" class="form-control" id="additionalInfo" name="additionalInfo"
+                                              data-maxlength="300">${account.additionalInfo}</textarea>
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
                                 </div>

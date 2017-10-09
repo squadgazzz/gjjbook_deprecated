@@ -88,10 +88,10 @@ body {
     top: 30%;
 }
 
-#birth_date {
+#birthDate {
     padding-right: 0;
 }
 
-#phone_type option {
+#type option {
     background-color: #4dff58;
 }

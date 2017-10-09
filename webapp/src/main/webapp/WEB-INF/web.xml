@@ -4,16 +4,27 @@
          xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
          version="3.1">
 
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:/webapp-context.xml</param-value>
-    </context-param>
+    <!--<context-param>-->
+        <!--<param-name>contextConfigLocation</param-name>-->
+        <!--<param-value>/WEB-INF/gjjbook-servlet.xml</param-value>-->
+    <!--</context-param>-->
 
-    <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
-    </listener>
+    <!--<listener>-->
+        <!--<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>-->
+    <!--</listener>-->
 
     <servlet>
+        <servlet-name>gjjbook</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>gjjbook</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <!--<servlet>
         <servlet-name>Login</servlet-name>
         <jsp-file>/WEB-INF/JSP/login.jsp</jsp-file>
         <load-on-startup>1</load-on-startup>
@@ -22,9 +33,9 @@
     <servlet-mapping>
         <servlet-name>Login</servlet-name>
         <url-pattern>/login</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
-    <servlet>
+    <!--<servlet>
         <servlet-name>Register</servlet-name>
         <jsp-file>/WEB-INF/JSP/register.jsp</jsp-file>
         <load-on-startup>1</load-on-startup>
@@ -33,7 +44,7 @@
     <servlet-mapping>
         <servlet-name>Register</servlet-name>
         <url-pattern>/register</url-pattern>
-    </servlet-mapping>
+    </servlet-mapping>-->
 
     <resource-ref>
         <description>DB Connection</description>
@@ -43,6 +54,6 @@
     </resource-ref>
 
     <session-config>
-        <session-timeout>60</session-timeout>
+        <session-timeout>600</session-timeout>
     </session-config>
 </web-app>

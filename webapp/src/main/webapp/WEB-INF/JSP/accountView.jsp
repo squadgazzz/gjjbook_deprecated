@@ -105,26 +105,46 @@
                                             </tr>
                                         </c:forEach>
                                     </c:if>
-                                    <tr>
-                                        <td>Home address:</td>
-                                        <td>${account.homeAddress}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Work address:</td>
-                                        <td>${account.workAddress}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>icq:</td>
-                                        <td>${account.icq}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>skype:</td>
-                                        <td>${account.skype}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Additional info:</td>
-                                        <td>${account.additionalInfo}</td>
-                                    </tr>
+
+                                    <c:set var="homeAddress" value="${account.homeAddress}"/>
+                                    <c:if test="${not empty homeAddress}">
+                                        <tr>
+                                            <td>Home address:</td>
+                                            <td>${homeAddress}</td>
+                                        </tr>
+                                    </c:if>
+
+                                    <c:set var="workAddress" value="${account.workAddress}"/>
+                                    <c:if test="${not empty workAddress}">
+                                        <tr>
+                                            <td>Work address:</td>
+                                            <td>${workAddress}</td>
+                                        </tr>
+                                    </c:if>
+
+                                    <c:set var="icq" value="${account.icq}"/>
+                                    <c:if test="${not empty icq}">
+                                        <tr>
+                                            <td>icq:</td>
+                                            <td>${icq}</td>
+                                        </tr>
+                                    </c:if>
+
+                                    <c:set var="skype" value="${account.skype}"/>
+                                    <c:if test="${not empty skype}">
+                                        <tr>
+                                            <td>skype:</td>
+                                            <td>${skype}</td>
+                                        </tr>
+                                    </c:if>
+
+                                    <c:set var="additionalInfo" value="${account.additionalInfo}"/>
+                                    <c:if test="${not empty additionalInfo}">
+                                        <tr>
+                                            <td>Additional info:</td>
+                                            <td>${additionalInfo}</td>
+                                        </tr>
+                                    </c:if>
                                     </tbody>
                                 </table>
                             </div>
