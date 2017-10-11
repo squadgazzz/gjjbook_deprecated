@@ -28,9 +28,6 @@ public class AccountDaoTest {
     private AccountDao accountDao;
     @Autowired
     private DataSource dataSource;
-    // done: 20.09.2017 убрать поле с коннекшеном
-
-    // done: 20.09.2017 автовайрить датосорс вместо темплейта
 
     @Before
     public void setUp() throws Exception, DaoException {

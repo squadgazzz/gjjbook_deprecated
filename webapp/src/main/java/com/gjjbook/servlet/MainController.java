@@ -21,9 +21,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @SessionAttributes("loggedUser")
@@ -45,7 +46,7 @@ public class MainController {
                                           @RequestParam(value = "email", required = false) String paramEmail,
                                           @RequestParam(value = "password", required = false) String paramPassword,
                                           @RequestParam(value = "rememberMe", required = false) Object rememberMe,
-                                          HttpServletResponse response) throws ServletException {
+                                          HttpServletResponse response, HttpServletRequest request) throws ServletException {
         boolean isEncrypted = true;
         ModelAndView modelAndView;
 
@@ -73,7 +74,7 @@ public class MainController {
                     if (path == null) {
                         path = "/account?id=" + loggedUser.getId();
                     }
-                    modelAndView = new ModelAndView("redirect:" + path);
+                    modelAndView = new ModelAndView("redirect:" + request.getContextPath() + path);
                     modelAndView.addObject("loggedUser", loggedUser);
                 } else {
                     modelAndView = new ModelAndView("/login");
@@ -155,16 +156,11 @@ public class MainController {
                 setValue(LocalDate.parse(text));
             }
         });
-//        binder.registerCustomEditor(ArrayList.class, "phones", new CustomCollectionEditor(ArrayList.class));
-        binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
-    }
-
-    @InitBinder("phone")
-    public void customPhoneModel(WebDataBinder binder) {
         binder.registerCustomEditor(PhoneType.class, "type", new PropertyEditorSupport() {
             @Override
             public String getAsText() {
-                return ((PhoneType) getValue()).name();
+                PhoneType phoneType = (PhoneType) getValue();
+                return phoneType.name();
             }
 
             @Override
@@ -172,9 +168,13 @@ public class MainController {
                 setValue(PhoneType.valueOf(text));
             }
         });
+//        binder.registerCustomEditor(ArrayList.class, "phones", new CustomCollectionEditor(ArrayList.class));
+        binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
     }
 
     // done: 06.10.2017 с аттрибутом enctype="multipart/form-data" не работает, пришлось добавить MultipartHttpServletRequest
+    // donegi: 09.10.2017 попробовать запустить через tomcat cmd
+    // done: 09.10.2017 починить аватарки в поиске
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
@@ -184,7 +184,7 @@ public class MainController {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
         } else {
-            account.setPhones(getNewPhones(request)); // TODO: 09.10.2017 как??
+            // done: 09.10.2017 переделать инпуты на jsp и телефоны собрать через ModelAttribute
             if (account.getAvatar() == null || account.getAvatar().length == 0) {
                 account.setAvatar(loggedUser.getAvatar());
             }
@@ -195,7 +195,7 @@ public class MainController {
                 throw new ServletException(e);
             }
 
-            return new ModelAndView("redirect:/account?id=" + account.getId());
+            return new ModelAndView("redirect:" + request.getContextPath() + "/account?id=" + account.getId());
         }
     }
 
@@ -214,20 +214,7 @@ public class MainController {
             throw new ServletException(e);
         }
 
-        return new ModelAndView("redirect:/login");
-    }
-
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public ModelAndView logout(HttpServletRequest request, HttpServletResponse response) {
-        request.getSession().invalidate();
-        Cookie emailCookie = new Cookie("email", "");
-        Cookie passwordCookie = new Cookie("password", "");
-        emailCookie.setMaxAge(0);
-        passwordCookie.setMaxAge(0);
-        response.addCookie(emailCookie);
-        response.addCookie(passwordCookie);
-
-        return new ModelAndView("/login");
+        return new ModelAndView("redirect:" + request.getContextPath() + "/login");
     }
 
     @RequestMapping(value = "/search")
@@ -235,7 +222,12 @@ public class MainController {
         ModelAndView modelAndView = new ModelAndView("/searchResults");
         try {
             List<Account> accounts = service.findByPartName(query);
+            Map<Integer, String> encodedAvatars = new HashMap<>();
+            for (Account a : accounts) {
+                encodedAvatars.put(a.getId(), service.getEncodedAvatar(a));
+            }
             modelAndView.addObject("accounts", accounts);
+            modelAndView.addObject("encodedAvatars", encodedAvatars);
         } catch (ServiceException e) {
             throw new ServletException(e);
         }

@@ -20,5 +20,15 @@
 
     <mvc:annotation-driven/>
     <mvc:default-servlet-handler/>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*"/>
+            <bean class="com.gjjbook.servlet.AuthenticationInterceptor"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/"/>
+            <bean class="com.gjjbook.servlet.IndexInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
 </beans>

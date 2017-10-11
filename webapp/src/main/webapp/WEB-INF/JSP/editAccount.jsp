@@ -51,7 +51,7 @@
                         <div class="well">
                             <img width="100%" alt="Avatar"
                                  src="data:image/jpeg;base64,${avatar}"/><br/><br/>
-                            <input type="file" id="avatar" name="avatar" class="file">
+                            <input type="file" name="avatar" class="file">
                         </div>
                     </div>
                 </div>
@@ -60,7 +60,7 @@
                 <div class="row">
                     <div class="col-xs-12 col-right">
                         <div class="well">
-                            <input type="hidden" id="id" name="id" value="${account.id}">
+                            <input type="hidden" name="id" value="${account.id}">
                             <div class="form-group has-feedback">
                                 <label class="control-label col-sm-3" for="name">Name*:</label>
                                 <div class="col-sm-9">
@@ -118,14 +118,14 @@
                                 </div>
                             </div>
 
-                            <c:forEach var="phone" items="${account.phones}">
+                            <c:forEach var="phone" items="${account.phones}" varStatus="loop">
                                 <c:if test="${not empty phone}">
                                     <div class="form-group phone has-feedback">
                                         <label class="col-sm-3">
-                                            <select style="padding-right: 0;" id="type" class="form-control"
-                                                    name="type">
+                                            <select style="padding-right: 0;" class="form-control"
+                                                    name="phones[${loop.index}].type">
                                                 <c:forEach var="phoneType" items="<%= PhoneType.values() %>">
-                                                    <option id="${phone.id}"
+                                                    <option
                                                             <c:if test="${phone.type == phoneType}">
                                                                 selected
                                                             </c:if>
@@ -137,7 +137,7 @@
                                         </label>
 
                                         <div class="col-sm-6">
-                                            <input class="form-control" type="text" name="number" id="${phone.id}"
+                                            <input class="form-control" type="text" name="phones[${loop.index}].number"
                                                    value="${phone.number}" required="required" data-minlength="18"
                                                    data-maxlength="18" data-pattern-error="Only digits. Length 10.">
                                             <span class="glyphicon form-control-feedback" aria-hidden="true"></span>

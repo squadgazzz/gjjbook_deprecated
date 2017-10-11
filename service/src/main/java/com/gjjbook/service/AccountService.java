@@ -216,19 +216,6 @@ public class AccountService implements Serviceable<Account, Integer> {
 
     }
 
-//    @Transactional
-//    public void setPassword(Account account, String password) throws ServiceException {
-//        if (account == null || password == null) {
-//            return;
-//        }
-//
-//        try {
-//            accountDao.setPassword(account, password);
-//        } catch (DaoException e) {
-//            throw new ServiceException(e);
-//        }
-//    }
-
     public boolean isPasswordMatch(String email, String password, boolean isEncrypted) throws ServiceException {
         if (email == null || password == null) {
             return false;

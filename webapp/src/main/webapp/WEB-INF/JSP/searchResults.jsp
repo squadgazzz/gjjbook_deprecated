@@ -40,8 +40,7 @@
                         <c:if test="${not empty account}">
                             <tr>
                                 <td>
-                                    <c:set var="image" value="${accountService.getEncodedAvatar(account)}"/>
-                                    <img width="100px" alt="Avatar" src="data:image/jpeg;base64,${image}"/>
+                                    <img width="100px" alt="Avatar" src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>
                                     <a href="<c:url value="/account?id=${account.id}"/>">
                                             ${account.name} ${account.surName}
                                     </a>

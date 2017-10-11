@@ -4,14 +4,14 @@ $(document).ready(function () {
     maskPhoneNumber();
     modalController();
     $('form[name="main_form"]').validator();
-    $("#birthDate").datepicker({
+    $([name="birthDate"]).datepicker({
         dateFormat: "yy-mm-dd"
     });
 
 });
 
 function phoneFilter() {
-    $('input[name="number"]').keydown(function (e) {
+    $('input[name$="number"]').keydown(function (e) {
         // Allow: backspace, delete, tab, escape, enter
         if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
             // Allow: Ctrl+A, Command+A
@@ -42,8 +42,8 @@ function modalController() {
 }
 
 function maskPhoneNumber() {
-    $('.phone').find('input[name="number"]').mask("+7 (999) 999 99 99");
-    $('.phone').find('input[name="number"]').keydown(function (e) {
+    $('.phone').find('input[name$="number"]').mask("+7 (999) 999 99 99");
+    $('.phone').find('input[name$="number"]').keydown(function (e) {
         var oldvalue = $(this).val();
         var field = this;
         setTimeout(function () {
@@ -55,18 +55,32 @@ function maskPhoneNumber() {
 }
 
 function addButtonClick() {
-    var $clone = $('.phone:last').clone();
-    $clone.find('input[name="number"]').val("+7");
-    $clone.find('#type').val('MOBILE');
+    var $lastPhone = $('.phone:last');
+    var $clone = $lastPhone.clone();
 
-    $('.phone:last').find('[name="add_button"]').css("display", "none");
-    $('.phone:last').after($clone);
+    $clone.find('input[name$="number"]').val("+7");
+    $clone.find('select[name$="type"]').val('MOBILE');
+    $lastPhone.find('[name="add_button"]').css("display", "none");
+    $lastPhone.after($clone);
 
     checkRemoveButton();
     checkAddButton();
     maskPhoneNumber();
     phoneFilter();
+    updatePhonesInputNames();
     $('form[name="main_form"]').validator('update');
+}
+
+function updatePhonesInputNames() {
+    $('input[name$="number"]').each(function (index) {
+        $(this).attr('name', "phones[" + index + "].number");
+        $(this).attr('id', "phones[" + index + "].number");
+    });
+
+    $('select[name$="type"]').each(function (index) {
+        $(this).attr('name', "phones[" + index + "].type");
+        $(this).attr('id', "phones[" + index + "].number");
+    });
 }
 
 function removeButtonClick(element) {
