@@ -20,7 +20,7 @@
         </div>
         <div class="col-xs-6">
             <div class="well">
-                <form method="post" action="/account_registration" enctype="multipart/form-data">
+                <form method="post" action="<c:url value="/account_registration"/>" enctype="multipart/form-data">
                     <table class="table">
                         <tbody>
                         <tr>
@@ -56,7 +56,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <select id="type" name="type">
+                                <select id="type" name="phones[0].type">
                                     <c:forEach var="phoneType" items="<%= PhoneType.values() %>">
                                         <option <c:if test="${phoneType=='MOBILE'}"> selected</c:if>
                                                 value="${phoneType}"> ${phoneType} </option>
@@ -65,7 +65,7 @@
                                 phone:
                             </td>
                             <td>
-                                <input type="text" id="number" name="number" placeholder="X-XXX-XXX-XX-XX">
+                                <input type="text" id="number" name="phones[0].number" placeholder="X-XXX-XXX-XX-XX">
                             </td>
                         </tr>
                         </tbody>

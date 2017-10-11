@@ -15,16 +15,14 @@
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
     <script src="<c:url value="/JS/editAccount.js" />"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <link rel="stylesheet" href="<c:url value="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"/>">
     <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
 </head>
 <body>
 <div class="fixed-centered container">
     <div class="row row-top">
         <form class="form-horizontal" id="submit" role="form" data-toggle="validator" name="main_form" method="post"
-              action="/updateaccount" enctype="multipart/form-data">
+              action="<c:url value="/updateaccount"/>" enctype="multipart/form-data">
             <div class="col-xs-2">
                 <ul class="list-group">
                     <li>

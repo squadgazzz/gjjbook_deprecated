@@ -1,7 +1,6 @@
 package com.gjjbook.servlet;
 
 import com.gjjbook.domain.Account;
-import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
 import com.gjjbook.service.AccountService;
 import com.gjjbook.service.ServiceException;
@@ -22,7 +21,6 @@ import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -74,7 +72,7 @@ public class MainController {
                     if (path == null) {
                         path = "/account?id=" + loggedUser.getId();
                     }
-                    modelAndView = new ModelAndView("redirect:" + request.getContextPath() + path);
+                    modelAndView = new ModelAndView("redirect:" + path);
                     modelAndView.addObject("loggedUser", loggedUser);
                 } else {
                     modelAndView = new ModelAndView("/login");
@@ -168,12 +166,11 @@ public class MainController {
                 setValue(PhoneType.valueOf(text));
             }
         });
-//        binder.registerCustomEditor(ArrayList.class, "phones", new CustomCollectionEditor(ArrayList.class));
         binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
     }
 
     // done: 06.10.2017 с аттрибутом enctype="multipart/form-data" не работает, пришлось добавить MultipartHttpServletRequest
-    // donegi: 09.10.2017 попробовать запустить через tomcat cmd
+    // done: 09.10.2017 попробовать запустить через tomcat cmd
     // done: 09.10.2017 починить аватарки в поиске
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
@@ -195,31 +192,30 @@ public class MainController {
                 throw new ServletException(e);
             }
 
-            return new ModelAndView("redirect:" + request.getContextPath() + "/account?id=" + account.getId());
+            return new ModelAndView("redirect:/account?id=" + account.getId());
         }
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ModelAndView register() {
-        return new ModelAndView("/register");
+    public ModelAndView register(HttpServletRequest request) {
+        return new ModelAndView("register");
     }
 
     @RequestMapping(value = "/account_registration", method = RequestMethod.POST)
     public ModelAndView accountRegistration(@ModelAttribute("account") Account account,
                                             HttpServletRequest request) throws ServletException {
         try {
-            account.setPhones(getNewPhones(request));
             service.create(account);
         } catch (ServiceException e) {
             throw new ServletException(e);
         }
 
-        return new ModelAndView("redirect:" + request.getContextPath() + "/login");
+        return new ModelAndView("redirect:/login");
     }
 
     @RequestMapping(value = "/search")
-    public ModelAndView search(@RequestParam("q") String query) throws ServletException {
-        ModelAndView modelAndView = new ModelAndView("/searchResults");
+    public ModelAndView search(@RequestParam("q") String query, HttpServletRequest request) throws ServletException {
+        ModelAndView modelAndView = new ModelAndView("searchResults");
         try {
             List<Account> accounts = service.findByPartName(query);
             Map<Integer, String> encodedAvatars = new HashMap<>();
@@ -235,17 +231,13 @@ public class MainController {
         return modelAndView;
     }
 
-    private List<Phone> getNewPhones(HttpServletRequest req) throws ServletException {
-        List<Phone> newPhones = new LinkedList<>();
-        String[] phoneTypes = req.getParameterValues("type");
-        String[] phoneNumbers = req.getParameterValues("number");
-        if (phoneNumbers.length != phoneTypes.length) {
-            throw new ServletException("Phone types count doesn't match numbers count");
+    @RequestMapping(value = "/quickSearch")
+    @ResponseBody
+    public List<Account> quickSearch(@RequestParam("q") String query) throws ServletException {
+        try {
+            return service.findByPartName(query);
+        } catch (ServiceException e) {
+            throw new ServletException(e);
         }
-        for (int i = 0; i < phoneNumbers.length; i++) {
-            newPhones.add(new Phone(PhoneType.valueOf(phoneTypes[i]), phoneNumbers[i]));
-        }
-
-        return newPhones;
     }
 }

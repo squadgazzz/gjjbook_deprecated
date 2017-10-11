@@ -24,6 +24,6 @@ public class LogoutController {
         response.addCookie(emailCookie);
         response.addCookie(passwordCookie);
 
-        return new ModelAndView("redirect:" + request.getContextPath() + "/login");
+        return new ModelAndView("redirect:/login");
     }
 }

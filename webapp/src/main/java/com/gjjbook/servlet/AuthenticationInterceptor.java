@@ -45,7 +45,7 @@ public class AuthenticationInterceptor extends HandlerInterceptorAdapter {
                     request.setAttribute("email", email);
                     request.setAttribute("password", password);
                     request.setAttribute("path", path);
-                    RequestDispatcher rd = session.getServletContext().getRequestDispatcher(request.getContextPath() + "/login_authenticate");
+                    RequestDispatcher rd = session.getServletContext().getRequestDispatcher("/login_authenticate");
                     rd.forward(request, response);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/login");
