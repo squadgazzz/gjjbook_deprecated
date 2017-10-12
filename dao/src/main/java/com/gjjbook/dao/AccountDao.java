@@ -1,6 +1,7 @@
 package com.gjjbook.dao;
 
 import com.gjjbook.domain.Account;
+import com.gjjbook.domain.DTO.AccountDTO;
 import com.gjjbook.domain.Sex;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -225,14 +226,14 @@ public class AccountDao extends AbstractJdbcDao<Account, Integer> {
             for (Account f : friends) {
                 objectFriendsId.add(f.getId());
                 if (!friendsIdFromDb.contains(f.getId())) {
-                    String sql = "INSERT INTO Friends Account_id= ?, Friend_id= ?";
+                    String sql = "INSERT INTO Friends (Account_id, Friend_id) VALUES(?,?)";
                     jdbcTemplate.update(sql, id, f.getId());
                 }
             }
 
             for (Integer friendId : friendsIdFromDb) {
                 if (!objectFriendsId.contains(friendId)) {
-                    String sql = "DELETE FROM Friends WHERE Account_id= ?, Friend_id= ?";
+                    String sql = "DELETE FROM Friends WHERE Account_id= ? AND Friend_id= ?";
                     jdbcTemplate.update(sql, id, friendId);
                 }
             }
@@ -242,13 +243,13 @@ public class AccountDao extends AbstractJdbcDao<Account, Integer> {
         }
     }
 
-    public List<Account> findByPartName(String findField) throws DaoException {
+    public List<AccountDTO> findByPartName(String findField) throws DaoException {
         String part = "'%" + findField + "%'";
         String sql = "SELECT * FROM Accounts WHERE name LIKE " + part +
                 " OR middlename LIKE " + part +
                 " OR surname LIKE " + part;
 
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Account.class));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AccountDTO.class));
     }
 
     private boolean setPassword(Account account) throws DaoException {

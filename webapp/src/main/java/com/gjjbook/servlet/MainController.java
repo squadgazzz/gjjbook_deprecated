@@ -1,6 +1,7 @@
 package com.gjjbook.servlet;
 
 import com.gjjbook.domain.Account;
+import com.gjjbook.domain.DTO.AccountDTO;
 import com.gjjbook.domain.PhoneType;
 import com.gjjbook.service.AccountService;
 import com.gjjbook.service.ServiceException;
@@ -44,7 +45,7 @@ public class MainController {
                                           @RequestParam(value = "email", required = false) String paramEmail,
                                           @RequestParam(value = "password", required = false) String paramPassword,
                                           @RequestParam(value = "rememberMe", required = false) Object rememberMe,
-                                          HttpServletResponse response, HttpServletRequest request) throws ServletException {
+                                          HttpServletResponse response) throws ServletException {
         boolean isEncrypted = true;
         ModelAndView modelAndView;
 
@@ -102,7 +103,7 @@ public class MainController {
                     return null;
                 } else {
                     modelAndView.addObject("account", account);
-                    modelAndView.addObject("avatar", service.getEncodedAvatar(account));
+                    modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
                 }
             } catch (ServiceException e) {
                 throw new ServletException(e);
@@ -130,7 +131,7 @@ public class MainController {
                     return null;
                 } else {
                     modelAndView.addObject("account", account);
-                    modelAndView.addObject("avatar", service.getEncodedAvatar(account));
+                    modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
                 }
             } catch (ServiceException e) {
                 throw new ServletException(e);
@@ -175,8 +176,7 @@ public class MainController {
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
-                                      HttpServletResponse resp,
-                                      MultipartHttpServletRequest request) throws IOException, ServletException {
+                                      HttpServletResponse resp) throws IOException, ServletException {
         if (!account.getId().equals(loggedUser.getId())) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
@@ -197,8 +197,12 @@ public class MainController {
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ModelAndView register(HttpServletRequest request) {
-        return new ModelAndView("register");
+    public ModelAndView register(@SessionAttribute(value = "loggedUser", required = false) Account loggedUser) {
+        if (loggedUser == null) {
+            return new ModelAndView("register");
+        } else {
+            return new ModelAndView("redirect:/login");
+        }
     }
 
     @RequestMapping(value = "/account_registration", method = RequestMethod.POST)
@@ -214,13 +218,13 @@ public class MainController {
     }
 
     @RequestMapping(value = "/search")
-    public ModelAndView search(@RequestParam("q") String query, HttpServletRequest request) throws ServletException {
+    public ModelAndView search(@RequestParam("q") String query) throws ServletException {
         ModelAndView modelAndView = new ModelAndView("searchResults");
         try {
-            List<Account> accounts = service.findByPartName(query);
+            List<AccountDTO> accounts = service.findByPartName(query);
             Map<Integer, String> encodedAvatars = new HashMap<>();
-            for (Account a : accounts) {
-                encodedAvatars.put(a.getId(), service.getEncodedAvatar(a));
+            for (AccountDTO a : accounts) {
+                encodedAvatars.put(a.getId(), service.convertByteAvatarToString(a.getAvatar()));
             }
             modelAndView.addObject("accounts", accounts);
             modelAndView.addObject("encodedAvatars", encodedAvatars);
@@ -233,7 +237,7 @@ public class MainController {
 
     @RequestMapping(value = "/quickSearch")
     @ResponseBody
-    public List<Account> quickSearch(@RequestParam("q") String query) throws ServletException {
+    public List<AccountDTO> quickSearch(@RequestParam("q") String query) throws ServletException {
         try {
             return service.findByPartName(query);
         } catch (ServiceException e) {

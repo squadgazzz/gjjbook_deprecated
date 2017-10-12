@@ -15,7 +15,7 @@ import javax.servlet.http.HttpSession;
 public class LogoutController {
 
     @RequestMapping(method = RequestMethod.GET)
-    public ModelAndView logout(HttpSession session, HttpServletResponse response, HttpServletRequest request) {
+    public ModelAndView logout(HttpSession session, HttpServletResponse response) {
         session.invalidate();
         Cookie emailCookie = new Cookie("email", "");
         Cookie passwordCookie = new Cookie("password", "");

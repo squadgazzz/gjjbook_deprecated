@@ -4,6 +4,7 @@ import com.gjjbook.dao.AccountDao;
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.PhoneDao;
 import com.gjjbook.domain.Account;
+import com.gjjbook.domain.DTO.AccountDTO;
 import com.gjjbook.domain.Phone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -200,16 +201,13 @@ public class AccountService implements Serviceable<Account, Integer> {
         }
     }
 
-    public List<Account> findByPartName(String findField) throws ServiceException {
-        if (findField == null) {
+    public List<AccountDTO> findByPartName(String namePart) throws ServiceException {
+        if (namePart == null) {
             return null;
         }
 
         try {
-            List<Account> accounts = accountDao.findByPartName(findField);
-            setAccountsListPhones(accounts);
-
-            return accounts;
+            return accountDao.findByPartName(namePart);
         } catch (DaoException e) {
             throw new ServiceException(e);
         }
@@ -256,8 +254,8 @@ public class AccountService implements Serviceable<Account, Integer> {
         }
     }
 
-    public String getEncodedAvatar(Account account) throws ServiceException {
-        return Base64.getEncoder().encodeToString(account.getAvatar());
+    public String convertByteAvatarToString(byte[] byteArrayAvatar) throws ServiceException {
+        return Base64.getEncoder().encodeToString(byteArrayAvatar);
     }
 
     @Override
