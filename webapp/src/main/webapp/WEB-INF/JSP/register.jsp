@@ -38,7 +38,7 @@
                         </tr>
                         <tr>
                             <td>Middle name:</td>
-                            <td><input type="text" id="middleName" name="middleMame" placeholder="Middle name"></td>
+                            <td><input type="text" id="middleName" name="middleName" placeholder="Middle name"></td>
                         </tr>
                         <tr>
                             <td>Surname:</td>

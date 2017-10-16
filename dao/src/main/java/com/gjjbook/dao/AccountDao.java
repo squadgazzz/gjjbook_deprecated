@@ -243,13 +243,28 @@ public class AccountDao extends AbstractJdbcDao<Account, Integer> {
         }
     }
 
-    public List<AccountDTO> findByPartName(String findField) throws DaoException {
-        String part = "'%" + findField + "%'";
-        String sql = "SELECT * FROM Accounts WHERE name LIKE " + part +
-                " OR middlename LIKE " + part +
-                " OR surname LIKE " + part;
+    public List<AccountDTO> findByPartName(String query) throws DaoException { // done: 14.10.2017 возможен sql injection, защититься
+        String sql = "SELECT * FROM accounts WHERE \n" +
+                "concat_ws('', name, middleName, surName) LIKE ? OR\n" +
+                "concat_ws('', surName, middleName, name) LIKE ? OR\n" +
+                "concat_ws('', name, surName, middleName) LIKE ? OR\n" +
+                "concat_ws('', middleName, surName, name) LIKE ? OR\n" +
+                "concat_ws('', middleName, name, surName) LIKE ? OR\n" +
+                "concat_ws('', surName, name, middleName) LIKE ?";
+        Object[] preparedQuery = getPreparedQuery(query, 6);
 
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AccountDTO.class));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AccountDTO.class), preparedQuery);
+    }
+
+    private String[] getPreparedQuery(String query, int count) {
+        query = query.replaceAll("\\s", "");
+        query = "%" + query + "%";
+        String[] preparedQuery = new String[count];
+        for (int i = 0; i < count; i++) {
+            preparedQuery[i] = query;
+        }
+
+        return preparedQuery;
     }
 
     private boolean setPassword(Account account) throws DaoException {

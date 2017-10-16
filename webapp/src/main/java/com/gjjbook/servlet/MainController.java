@@ -170,9 +170,6 @@ public class MainController {
         binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
     }
 
-    // done: 06.10.2017 с аттрибутом enctype="multipart/form-data" не работает, пришлось добавить MultipartHttpServletRequest
-    // done: 09.10.2017 попробовать запустить через tomcat cmd
-    // done: 09.10.2017 починить аватарки в поиске
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
@@ -181,7 +178,6 @@ public class MainController {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
         } else {
-            // done: 09.10.2017 переделать инпуты на jsp и телефоны собрать через ModelAttribute
             if (account.getAvatar() == null || account.getAvatar().length == 0) {
                 account.setAvatar(loggedUser.getAvatar());
             }
@@ -196,18 +192,17 @@ public class MainController {
         }
     }
 
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @RequestMapping(value = "/register")
     public ModelAndView register(@SessionAttribute(value = "loggedUser", required = false) Account loggedUser) {
         if (loggedUser == null) {
             return new ModelAndView("register");
         } else {
-            return new ModelAndView("redirect:/login");
+            return new ModelAndView("redirect:/logout");
         }
     }
 
     @RequestMapping(value = "/account_registration", method = RequestMethod.POST)
-    public ModelAndView accountRegistration(@ModelAttribute("account") Account account,
-                                            HttpServletRequest request) throws ServletException {
+    public ModelAndView accountRegistration(@ModelAttribute("account") Account account) throws ServletException {
         try {
             service.create(account);
         } catch (ServiceException e) {

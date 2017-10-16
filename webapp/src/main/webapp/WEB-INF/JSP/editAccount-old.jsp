@@ -11,16 +11,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
+    <%--сделать кеширование css\js, проверить, что это будет работать через томкат из cmd--%>
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
-
-    <script src="<c:url value="/webjars/jquery/3.2.1/jquery.min.js"/>"></script>
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
-    <script src="<c:url value="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"/>"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
     <script src="<c:url value="/JS/editAccount.js" />"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
     <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
 </head>
 <body>
@@ -69,7 +64,7 @@
                                 <div class="col-sm-9">
                                     <input class="form-control" id="name" type="text" name="name"
                                            value="${account.name}" data-error="Name is required" required="required"
-                                           pattern="^[_A-z\s-]{1,}$" data-pattern-error="Only A-Z allowed"
+                                           pattern="^[_A-z]{1,}$" data-pattern-error="Only A-Z allowed"
                                            data-maxlength="40">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
@@ -80,7 +75,7 @@
                                 <label class="control-label col-sm-3" for="middleName">Middle Name:</label>
                                 <div class="col-sm-9">
                                     <input class="form-control" id="middleName" type="text" name="middleName"
-                                           value="${account.middleName}" pattern="^[_A-z\s-]{1,}$"
+                                           value="${account.middleName}" pattern="^[_A-z]{1,}$"
                                            data-pattern-error="Only A-Z allowed" data-maxlength="40">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
@@ -92,7 +87,7 @@
                                 <div class="col-sm-9">
                                     <input class="form-control" id="surName" type="text" name="surName"
                                            value="${account.surName}" data-error="Surname is required"
-                                           required="required" pattern="^[_A-z\s-]{1,}$"
+                                           required="required" pattern="^[_A-z]{1,}$"
                                            data-pattern-error="Only A-Z allowed" data-maxlength="40">
                                     <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
                                     <div class="help-block with-errors"></div>
@@ -100,24 +95,13 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="control-label col-sm-3">Gender*:</label>
+                                <label class="control-label col-sm-3" for="surname">Gender*:</label>
                                 <div class="col-sm-9">
                                     <input type="radio" name="sex"
                                            <c:if test="${account.sex=='MALE'}">checked</c:if> value="MALE"> Male
                                     <input type="radio" name="sex"
                                            <c:if test="${account.sex=='FEMALE'}">checked</c:if> value="FEMALE">
                                     Female
-                                </div>
-                            </div>
-
-                            <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="birthDate">Birth date*:</label>
-                                <div class="col-sm-3">
-                                    <input class="form-control" id="birthDate" type="text" name="birthDate"
-                                           value="${account.birthDate}" required="required"
-                                           data-minlength="10" data-maxlength="10">
-                                    <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
-                                    <div class="help-block with-errors"></div>
                                 </div>
                             </div>
 
@@ -140,10 +124,14 @@
                                         </label>
 
                                         <div class="col-sm-6">
-                                            <input class="form-control" type="text" name="phones[${loop.index}].number"
-                                                   value="${phone.number}" required="required" data-minlength="18"
-                                                   data-maxlength="18" data-pattern-error="Only digits. Length 10.">
-                                            <span class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                                            <input class="form-control" type="text"
+                                                   name="phones[${loop.index}].number"
+                                                   value="${phone.number}" required="required"
+                                                   data-minlength="18"
+                                                   data-maxlength="18"
+                                                   data-pattern-error="Only digits. Length 10.">
+                                            <span class="glyphicon form-control-feedback"
+                                                  aria-hidden="true"></span>
                                             <div class="help-block with-errors"></div>
                                         </div>
                                         <div class="col-sm-1">
@@ -203,7 +191,8 @@
                             </div>
 
                             <div class="form-group has-feedback">
-                                <label class="control-label col-sm-3" for="additionalInfo">Additional info:</label>
+                                <label class="control-label col-sm-3" for="additionalInfo">Additional
+                                    info:</label>
                                 <div class="col-sm-9">
                                     <textarea rows="10" class="form-control" id="additionalInfo" name="additionalInfo"
                                               data-maxlength="300">${account.additionalInfo}</textarea>
@@ -233,7 +222,8 @@
                                 </div>
                             </div>
 
-                            <input type="button" onclick="validateForm()" value="Confirm changes" class="btn btn-block">
+                            <input type="button" onclick="validateForm()" value="Confirm changes"
+                                   class="btn btn-block">
 
                         </div>
                     </div>

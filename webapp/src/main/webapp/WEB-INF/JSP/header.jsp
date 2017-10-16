@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="<c:url value="/CSS/header.css" />">
 
     <script src="<c:url value="/webjars/jquery/3.2.1/jquery.min.js"/>"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="<c:url value="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"/>"></script>
     <script src="<c:url value="/JS/quickSearch.js"/>"></script>

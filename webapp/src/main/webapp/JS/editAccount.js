@@ -4,7 +4,7 @@ $(document).ready(function () {
     maskPhoneNumber();
     modalController();
     $('form[name="main_form"]').validator();
-    $([name="birthDate"]).datepicker({
+    $('#birthDate').datepicker({
         dateFormat: "yy-mm-dd"
     });
 
