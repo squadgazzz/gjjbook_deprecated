@@ -245,15 +245,52 @@ public class AccountDao extends AbstractJdbcDao<Account, Integer> {
 
     public List<AccountDTO> findByPartName(String query) throws DaoException { // done: 14.10.2017 возможен sql injection, защититься
         String sql = "SELECT * FROM accounts WHERE \n" +
-                "concat_ws('', name, middleName, surName) LIKE ? OR\n" +
-                "concat_ws('', surName, middleName, name) LIKE ? OR\n" +
-                "concat_ws('', name, surName, middleName) LIKE ? OR\n" +
-                "concat_ws('', middleName, surName, name) LIKE ? OR\n" +
-                "concat_ws('', middleName, name, surName) LIKE ? OR\n" +
-                "concat_ws('', surName, name, middleName) LIKE ?";
+                "REPLACE(CONCAT_WS('', name, middleName, surName), ' ', '') LIKE ? OR\n" +
+                "REPLACE(CONCAT_WS('', surName, middleName, name), ' ', '') LIKE ? OR\n" +
+                "REPLACE(CONCAT_WS('', name, surName, middleName), ' ', '') LIKE ? OR\n" +
+                "REPLACE(CONCAT_WS('', middleName, surName, name), ' ', '') LIKE ? OR\n" +
+                "REPLACE(CONCAT_WS('', middleName, name, surName), ' ', '') LIKE ? OR\n" +
+                "REPLACE(CONCAT_WS('', surName, name, middleName), ' ', '') LIKE ?";
         Object[] preparedQuery = getPreparedQuery(query, 6);
 
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AccountDTO.class), preparedQuery);
+    }
+
+    public List<List<String>> combinations(List<String> input) {
+        return step(input, input.size(), new ArrayList<>());
+    }
+
+    public List<List<String>> step(List<String> input, int k, List<List<String>> result) {
+        // end
+        if (k == 0) {
+            return result;
+        }
+
+        // Start with [[1], [2], [3]] in result
+        if (result.size() == 0) {
+            for (String i : input) {
+                ArrayList<String> subList = new ArrayList<>();
+                subList.add(i);
+                result.add(subList);
+            }
+
+            // Around we go again.
+            return step(input, k - 1, result);
+        }
+
+        // Cross result with input.  Taking us to 2 entries per sub list.  Then 3. Then...
+        List<List<String>> newResult = new ArrayList<>();
+        for (List<String> subList : result) {
+            for (String i : input) {
+                List<String> newSubList = new ArrayList<>();
+                newSubList.addAll(subList);
+                newSubList.add(i);
+                newResult.add(newSubList);
+            }
+        }
+
+        // Around we go again.
+        return step(input, k - 1, newResult);
     }
 
     private String[] getPreparedQuery(String query, int count) {

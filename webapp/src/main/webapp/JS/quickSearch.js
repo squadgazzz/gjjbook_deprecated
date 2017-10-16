@@ -10,9 +10,16 @@ $(document).ready(function () {
                 },
                 success: function (data) {
                     response($.map(data, function (account, i) {
+                        var $result = account.name;
+                        var $middleName = account.middleName;
+                        if ($middleName !== null) {
+                            $result += ' ' + $middleName;
+                        }
+                        $result += ' ' + account.surName;
+
                         return {
                             data: account.id,
-                            value: account.name + ' ' + account.surName
+                            value: $result
                             // label: account.name + ' ' + account.surName // done: по клику на результат имя не должно подставляться в строку поиска
                         };
                     }));
