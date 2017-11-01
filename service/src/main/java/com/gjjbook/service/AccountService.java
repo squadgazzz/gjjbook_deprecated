@@ -5,16 +5,18 @@ import com.gjjbook.dao.DaoException;
 import com.gjjbook.dao.PhoneDao;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
-import com.gjjbook.domain.Phone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
-@Service
+@Service // TODO: 25.10.2017 не работает на интерфейсе
+@Transactional
+// TODO: 25.10.2017 если не ставить аннотацию у всего класса, то не работает. в интерфейсе тоже не работает
 public class AccountService implements Serviceable<Account, Integer> {
     private AccountDao accountDao;
     private PhoneDao phoneDao;
@@ -29,232 +31,57 @@ public class AccountService implements Serviceable<Account, Integer> {
     }
 
     @Override
-    public Account create(Account account) throws ServiceException {
+    public Account update(Account account) throws DaoException {
         if (account == null) {
             return null;
         }
 
-        try {
-            Account dbAccount = accountDao.create(account);
-            int id = dbAccount.getId();
-            List<Phone> phones = account.getPhones();
-            if (phones != null && phones.size() > 0) {
-                for (Phone p : phones) {
-                    p.setOwnerId(id);
-                    phoneDao.create(p);
-                }
-            }
-
-            return dbAccount;
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+        return accountDao.update(account);
     }
 
     @Override
-    public boolean update(Account account) throws ServiceException {
+    public void delete(Account account) {
         if (account == null) {
-            return false;
+            return;
         }
 
-        try {
-            int id = account.getId();
-            List<Phone> phonesFromDb = phoneDao.getPhonesByAccountId(id);
-            List<Phone> phones = account.getPhones();
-            accountDao.update(account);
-            if (phones != null) {
-                if (phones.size() > 0) {
-                    for (Phone p : phones) {
-                        p.setOwnerId(id);
-                        if (phonesFromDb != null || phonesFromDb.size() > 0) {
-                            int index = phonesFromDb.indexOf(p);
-                            if (index < 0) {
-                                phoneDao.create(p);
-                            } else {
-                                Phone oldPhone = phonesFromDb.get(index);
-                                if (!p.getType().equals(oldPhone.getType())) {
-                                    oldPhone.setType(p.getType());
-                                    phoneDao.update(oldPhone);
-                                }
-                            }
-                        } else {
-                            phoneDao.create(p);
-                        }
-                    }
-
-                    if (phonesFromDb != null) {
-                        for (Phone ph : phonesFromDb) {
-                            if (!phones.contains(ph)) {
-                                phoneDao.delete(ph);
-                            }
-                        }
-                    }
-                } else {
-                    for (Phone p : phonesFromDb) {
-                        phoneDao.delete(p);
-                    }
-                }
-            }
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-
-        return true;
+        accountDao.delete(account);
     }
 
     @Override
-    public boolean delete(Account account) throws ServiceException {
-        if (account == null) {
-            return false;
-        }
-
-        try {
-            List<Phone> phones = account.getPhones();
-            if (phones != null && phones.size() > 0) {
-                for (Phone p : phones) {
-                    phoneDao.delete(p);
-                }
-            }
-            return accountDao.delete(account);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    @Override
-    public Account getByPk(Integer id) throws ServiceException {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public Account getByPk(Integer id) {
         if (id == null) {
             return null;
         }
 
-        try {
-            List<Phone> phones = phoneDao.getPhonesByAccountId(id);
-            Account account = accountDao.getByPK(id);
-            account.setPhones(phones);
-
-            return account;
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+        return accountDao.getByPK(id);
     }
 
     @Override
-    public List<Account> getAll() throws ServiceException {
-        try {
-            List<Account> accounts = accountDao.getAll();
-            setAccountsListPhones(accounts);
-
-            return accounts;
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+    public List<Account> getAll() {
+        return accountDao.getAll();
     }
 
-    private void setAccountsListPhones(List<Account> accounts) throws DaoException {
-        if (accounts != null && accounts.size() > 0) {
-            for (Account a : accounts) {
-                List<Phone> phones = phoneDao.getPhonesByAccountId(a.getId());
-                a.setPhones(phones);
-            }
-        }
-    }
-
-    @Transactional
-    public void addFriend(Account account, Account friend) throws ServiceException {
-        addFriend(account, friend, true);
-    }
-
-    private void addFriend(Account account, Account friend, boolean isFirst) throws ServiceException {
-        List<Account> friends = account.getFriendList();
-        if (friends == null || friends.size() == 0) {
-            friends = new ArrayList<>();
-        }
-        if (friends.contains(friend)) {
-            throw new ServiceException("Account id #" + account.getId() + " already has this friend");
-        }
-        friends.add(friend);
-        account.setFriendList(friends);
-        update(account);
-
-        if (isFirst) {
-            addFriend(friend, account, false);
-        }
-    }
-
-    @Transactional
-    public void removeFriend(Account account, Account friend) throws ServiceException {
-        removeFriend(account, friend, true);
-    }
-
-    private void removeFriend(Account account, Account friend, boolean isFirst) throws ServiceException {
-        List<Account> friends = account.getFriendList();
-        if (friends != null && friends.contains(friend)) {
-            friends.remove(friend);
-            account.setFriendList(friends);
-            update(account);
-        } else {
-            throw new ServiceException("Account id #" + account.getId() + " doesn't have this friend");
-        }
-
-        if (isFirst) {
-            removeFriend(friend, account, false);
-        }
-    }
-
-    public List<AccountDTO> findByPartName(String namePart) throws ServiceException {
-        if (namePart == null) {
-            return null;
-        }
-
-        try {
-            return accountDao.findByPartName(namePart);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-
-    }
-
-    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) throws ServiceException {
-        if (email == null || password == null) {
-            return false;
-        }
-
-        try {
-            return accountDao.isPasswordMatch(email, password, isEncrypted);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    public Account getByEmail(String email) throws ServiceException {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public Account getByEmail(String email) {
         if (email == null) {
             return null;
         }
 
-        try {
-            Account account = accountDao.getByEmail(email);
-            List<Phone> phones = phoneDao.getPhonesByAccountId(account.getId());
-            account.setPhones(phones);
-
-            return account;
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
+        return accountDao.getByEmail(email);
     }
 
-    public String getPassword(Account account) throws ServiceException {
-        if (account == null) {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) {
+        return !(email == null || password == null) && accountDao.isPasswordMatch(email, password, isEncrypted);
+    }
+
+    public String convertByteAvatarToString(byte[] byteArrayAvatar) {
+        if (byteArrayAvatar == null) {
             return null;
         }
 
-        try {
-            return accountDao.getPassword(account);
-        } catch (DaoException e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    public String convertByteAvatarToString(byte[] byteArrayAvatar) throws ServiceException {
         return Base64.getEncoder().encodeToString(byteArrayAvatar);
     }
 
@@ -298,5 +125,13 @@ public class AccountService implements Serviceable<Account, Integer> {
 
     public void setPhoneDao(PhoneDao phoneDao) {
         this.phoneDao = phoneDao;
+    }
+
+    public List<AccountDTO> findByPartName(String query) {
+        if (query == null) {
+            return null;
+        }
+
+        return accountDao.findByPartName(query);
     }
 }

@@ -1,15 +1,25 @@
 package com.gjjbook.domain;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "phones")
 public class Phone implements Identified<Integer> {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int ownerId;
+    @ManyToOne(cascade = {CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @JoinColumn(name = "Account_id")
+    private Account owner;
+    @Enumerated(EnumType.STRING)
     private PhoneType type;
     private String number;
 
     public Phone() {
     }
 
-    public Phone(PhoneType type, String number) {
+    public Phone(Account owner, PhoneType type, String number) {
+        this.owner = owner;
         this.type = type;
         this.number = number;
     }
@@ -22,17 +32,21 @@ public class Phone implements Identified<Integer> {
         this.id = id;
     }
 
-    public int getOwnerId() {
-        return ownerId;
+    public Account getOwner() {
+        return this.owner;
     }
 
-    public void setOwnerId(int ownerId) {
-        this.ownerId = ownerId;
+    public void setOwner(Account account) {
+        this.owner = account;
+        if (!account.getPhones().contains(this)) { // warning this may cause performance issues if you have a large data set since this operation is O(n)
+            account.getPhones().add(this);
+        }
     }
 
     public PhoneType getType() {
         return type;
     }
+
 
     public void setType(PhoneType type) {
         this.type = type;
@@ -64,5 +78,15 @@ public class Phone implements Identified<Integer> {
     @Override
     public Integer getPK() {
         return getId();
+    }
+
+    @Override
+    public String toString() {
+        return "Phone{" +
+                "id=" + id +
+                ", owner=" + owner +
+                ", type=" + type +
+                ", number='" + number + '\'' +
+                '}';
     }
 }

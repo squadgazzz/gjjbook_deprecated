@@ -16,14 +16,14 @@
     <link rel="stylesheet" type="text/css"
           href="<c:url value="/webjars/bootstrap/3.3.7/css/bootstrap.css"/>"/>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="<c:url value="/CSS/main.css" />">
-    <link rel="stylesheet" href="<c:url value="/CSS/header.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/main.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/header.css" />">
 
     <script src="<c:url value="/webjars/jquery/3.2.1/jquery.min.js"/>"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="<c:url value="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"/>"></script>
-    <script src="<c:url value="/JS/quickSearch.js"/>"></script>
+    <script src="<c:url value="/js/quickSearch.js"/>"></script>
 </head>
 <body>
 <c:set var="account" value="${sessionScope.loggedUser}"/>

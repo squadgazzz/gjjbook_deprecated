@@ -10,7 +10,7 @@
 <html>
 <head>
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
-    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/body.css" />">
     <style>
         img.back {
             position: absolute;
@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-<img class="back" src="<c:url value="/IMG/background.png"/>"/>
+<img class="back" src="<c:url value="/img/background.png"/>"/>
 <div class="fixed-centered container">
     <div class="row row-top">
         <div class="col-xs-3">

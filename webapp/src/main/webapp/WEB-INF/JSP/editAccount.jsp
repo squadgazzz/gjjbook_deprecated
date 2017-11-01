@@ -19,9 +19,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
     <script src="<c:url value="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"/>"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
-    <script src="<c:url value="/JS/editAccount.js" />"></script>
+    <script src="<c:url value="/js/editAccount.js" />"></script>
+    <script src="<c:url value="/js/xmlParser.js" />"></script>
 
-    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/body.css" />">
 </head>
 <body>
 <div class="fixed-centered container">
@@ -120,7 +121,7 @@
                                     <div class="help-block with-errors"></div>
                                 </div>
                             </div>
-
+                            <%--<input type="hidden" id="Account_id" value="${account.id}">--%>
                             <c:forEach var="phone" items="${account.phones}" varStatus="loop">
                                 <c:if test="${not empty phone}">
                                     <div class="form-group phone has-feedback">
@@ -140,6 +141,8 @@
                                         </label>
 
                                         <div class="col-sm-6">
+                                                <%--<input type="hidden" name="phones[${loop.index}].id" value="${phone.id}">--%>
+                                                <%--<input type="hidden" path="phones[${loop.index}].owner" value="${account}">--%>
                                             <input class="form-control" type="text" name="phones[${loop.index}].number"
                                                    value="${phone.number}" required="required" data-minlength="18"
                                                    data-maxlength="18" data-pattern-error="Only digits. Length 10.">
@@ -233,7 +236,16 @@
                                 </div>
                             </div>
 
-                            <input type="button" onclick="validateForm()" value="Confirm changes" class="btn btn-block">
+                            <input type="button" onclick="validateForm()" name="confirm-changes" value="Confirm changes"
+                                   class="btn btn-block"><br>
+                            <input type="button" onclick="exportToXml()" value="Export to XML"
+                                   class="btn btn-block">
+                            <a style="display: none" class="to-xml-download-file" href="#"></a><br>
+
+                            <input type="button" onclick="importFromXml()" value="Import from XML"
+                                   class="btn btn-block">
+                            <input type="file" id="xmlInput" style="display: none"/>
+
 
                         </div>
                     </div>
@@ -253,7 +265,7 @@
                     <p>Are you sure?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-confirm="modal">Yes</button>
+                    <button type="button" class="btn btn-success" name="confirm-modal" data-confirm="modal">Yes</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
                 </div>
             </div>

@@ -1,16 +1,31 @@
 package com.gjjbook.domain;
 
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "accounts")
 public class Account implements Identified<Integer> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Lob
     private byte[] avatar;
     private String name;
     private String middleName;
     private String surName;
+    @Enumerated(EnumType.STRING)
     private Sex sex;
     private LocalDate birthDate;
+    @OneToMany
+            (
+                    mappedBy = "owner",
+                    cascade = CascadeType.ALL,
+                    orphanRemoval = true
+            )
     private List<Phone> phones;
     private String homeAddress;
     private String workAddress;
@@ -18,10 +33,34 @@ public class Account implements Identified<Integer> {
     private String icq;
     private String skype;
     private String additionalInfo;
+    @Transient
     private List<Account> friendList;
     private String password;
 
     public Account() {
+    }
+
+    public void addPhone(Phone phone) {
+        if (phone == null) {
+            return;
+        }
+
+        if (this.phones == null) {
+            this.phones = new ArrayList<>();
+        }
+        this.phones.add(phone);
+        if (phone.getOwner() != this) {
+            phone.setOwner(this);
+        }
+    }
+
+    public void removePhone(Phone phone) {
+        if (phone == null) {
+            return;
+        }
+
+        phones.remove(phone);
+        phone.setOwner(null);
     }
 
     public Account(byte[] avatar, String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, String password) {

@@ -2,8 +2,16 @@ package com.gjjbook.domain.DTO;
 
 import com.gjjbook.domain.Identified;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "accounts")
 public class AccountDTO implements Identified<Integer> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    @Lob
     private byte[] avatar;
     private String name;
     private String middleName;

@@ -2,149 +2,125 @@ package com.gjjbook.dao;
 
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
+import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.Sex;
 import org.mindrot.jbcrypt.BCrypt;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import javax.sql.rowset.serial.SerialBlob;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 //@Component
 //@Service // Service
 //@Controller // Spring MVC
 @Repository // DAO
-public class AccountDao extends AbstractJdbcDao<Account, Integer> {
+public class AccountDao extends AbstractDao<Account, Integer> {
 
     public AccountDao() {
     }
 
-    @Autowired
-    public AccountDao(JdbcTemplate jdbcTemplate) {
-        super(jdbcTemplate);
-    }
-
     @Override
-    public Account create(Account object) throws DaoException {
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
-        jdbcInsert.withTableName("Accounts").usingGeneratedKeyColumns("id");
-        Map<String, Object> params = new HashMap<>();
+    public Account update(Account account) throws DaoException {
+        String password = account.getPassword();
+        password = BCrypt.hashpw(password, BCrypt.gensalt());
+        account.setPassword(password);
+        if (account.getId().equals(0)) {
+            byte[] avatar = account.getAvatar();
+            if (avatar == null) {
+                account.setAvatar(getDefaultAvatar(account.getSex()));
+            }
+            List<Phone> phones = account.getPhones();
+            account.setPhones(null);
+            account = entityManager.merge(account);
+            entityManager.flush();
 
-        params.put("name", object.getName());
-        params.put("middleName", object.getMiddleName());
-        params.put("surName", object.getSurName());
-        params.put("sex", object.getSex().name());
-        params.put("birthDate", Date.valueOf(object.getBirthDate()));
-        params.put("homeAddress", object.getHomeAddress());
-        params.put("workAddress", object.getWorkAddress());
-        params.put("email", object.getEmail());
-        params.put("icq", object.getIcq());
-        params.put("skype", object.getSkype());
-        params.put("additionalInfo", object.getAdditionalInfo());
-        byte[] avatar = getAvatar(object);
-        Blob avatarBlob;
-        Integer key;
-        try {
-            avatarBlob = new SerialBlob(avatar);
-            params.put("avatar", avatarBlob);
-
-            key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(params)).intValue();
-            object.setId(key);
-
-            fillExternalData(object);
-            avatarBlob.free();
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-
-        return getByPK(key);
-    }
-
-    @Override
-    public boolean update(Account object) throws DaoException {
-        boolean isPasswordOk = true;
-        int isUpdateOk = jdbcTemplate.update(getUpdateQuery(), object.getName(), object.getMiddleName(),
-                object.getSurName(), object.getSex().name(), object.getBirthDate(), object.getHomeAddress(),
-                object.getWorkAddress(), object.getEmail(), object.getIcq(), object.getSkype(),
-                object.getAdditionalInfo(), object.getAvatar(), object.getId());
-
-        if (object.getPassword() != null) {
-            isPasswordOk = setPassword(object);
-        }
-
-        return isPasswordOk && isUpdateOk > 0;
-    }
-
-    @Override
-    public List<Account> getAll() throws DaoException {
-        return jdbcTemplate.query(getSelectQuery(), new BeanPropertyRowMapper<>(Account.class));
-    }
-
-    @Override
-    protected String getSelectQuery() {
-        return "SELECT * FROM Accounts";
-    }
-
-    @Override
-    protected String getUpdateQuery() {
-        return "UPDATE Accounts SET name= ?, middleName= ?, surName= ?, sex= ?, birthDate= ?, " +
-                "homeAddress= ?, workAddress= ?, email= ?, icq= ?, skype= ?, additionalInfo= ?, avatar= ?" +
-                getWhereByPKQuery();
-    }
-
-    @Override
-    protected String getDeleteQuery() {
-        return "DELETE FROM Accounts" + getWhereByPKQuery();
-    }
-
-    @Override
-    protected Account parseResultSet(ResultSet rs) throws DaoException {
-        Account account = new Account();
-        try {
-            account.setId(rs.getInt("id"));
-            account.setName(rs.getString("name"));
-            account.setMiddleName(rs.getString("middleName"));
-            account.setSurName(rs.getString("surName"));
-            account.setSex(Sex.valueOf(rs.getString("sex")));
-            account.setBirthDate(((Date) rs.getObject("birthDate")).toLocalDate());
-            account.setHomeAddress(rs.getString("homeAddress"));
-            account.setWorkAddress(rs.getString("workAddress"));
-            account.setEmail(rs.getString("email"));
-            account.setIcq(rs.getString("icq"));
-            account.setSkype(rs.getString("skype"));
-            account.setAdditionalInfo(rs.getString("additionalInfo"));
-            account.setAvatar(convertBlobToBytes(rs.getBlob("avatar")));
-            collectExternalData(account);
-        } catch (SQLException e) {
-            throw new DaoException(e);
-        }
-
-        return account;
-    }
-
-    private byte[] getAvatar(Account object) throws DaoException {
-        byte[] avatar = object.getAvatar();
-        if (avatar == null) {
-            if (object.getSex().equals(Sex.MALE)) {
-                avatar = getDefaultAvatar(Sex.MALE);
-            } else {
-                avatar = getDefaultAvatar(Sex.FEMALE);
+            if (phones != null && phones.size() > 0) {
+                for (Phone p : phones) {
+                    account.addPhone(p);
+                }
             }
         }
-        return avatar;
+
+        return entityManager.merge(account);
+    }
+
+    @Override
+    public Account getByPK(Integer key) {
+        if (key == null) {
+            return null;
+        }
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
+        Root<Account> from = criteriaQuery.from(Account.class);
+        CriteriaQuery<Account> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("id"), key));
+        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
+
+        try {
+            return typedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public List<Account> getAll() {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
+        Root<Account> from = criteriaQuery.from(Account.class);
+        CriteriaQuery<Account> select = criteriaQuery.select(from);
+        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
+
+        try {
+            return typedQuery.getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public Account getByEmail(String email) {
+        if (email == null) {
+            return null;
+        }
+
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
+        Root<Account> from = criteriaQuery.from(Account.class);
+        CriteriaQuery<Account> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("email"), email));
+        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
+
+        try {
+            return typedQuery.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) {
+        if (email == null || password == null) {
+            return false;
+        }
+
+        Account account = getByEmail(email);
+        if (account != null) {
+            String dbPassword = account.getPassword();
+            if (dbPassword != null) {
+                if (isEncrypted) {
+                    return dbPassword.equals(password);
+                } else {
+                    return BCrypt.checkpw(password, dbPassword);
+                }
+            }
+        }
+
+        return false;
     }
 
     private byte[] getDefaultAvatar(Sex sex) throws DaoException {
@@ -174,194 +150,81 @@ public class AccountDao extends AbstractJdbcDao<Account, Integer> {
         return image;
     }
 
+    public List<AccountDTO> findByPartName(String query) {
+        List<Object[]> queryList = permute(query.split(" "));
+//        String sql = "SELECT * FROM accounts WHERE \n" +
+//                "REPLACE(CONCAT_WS('', name, middleName, surName), ' ', '') LIKE ? OR\n" + ....
 
-    private byte[] convertBlobToBytes(Blob blob) throws DaoException {
-        if (blob == null) {
-            return null;
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<AccountDTO> criteriaQuery = cb.createQuery(AccountDTO.class);
+        Root<AccountDTO> from = criteriaQuery.from(AccountDTO.class);
+        Expression<String> fullName = cb.concat(from.get("name"), "");
+        fullName = cb.concat(fullName, from.get("middleName"));
+        fullName = cb.concat(fullName, from.get("surName"));
+        fullName = cb.function("REPLACE", String.class, fullName, cb.literal(" "), cb.literal(""));
+
+        Predicate whereClause = null;
+        for (Object[] q : queryList) {
+            if (whereClause == null) {
+                whereClause = cb.or(cb.like(fullName, "%" + String.join("",
+                        Arrays.copyOf(q, q.length, String[].class)) + "%"));
+            } else {
+                whereClause = cb.or(whereClause, cb.like(fullName, "%" + String.join("",
+                        Arrays.copyOf(q, q.length, String[].class)) + "%"));
+            }
         }
 
-        try {
-            return blob.getBytes(1, (int) blob.length());
-        } catch (SQLException e) {
-            throw new DaoException(e);
+        CriteriaQuery<AccountDTO> select = criteriaQuery.select(from).where(whereClause);
+        TypedQuery<AccountDTO> typedQuery = entityManager.createQuery(select);
+
+        return typedQuery.getResultList();
+    }
+
+    private Expression<String> concat(CriteriaBuilder cb, String delimiter, Expression<String>... expressions) {
+        Expression<String> result = null;
+        for (int i = 0; i < expressions.length; i++) {
+            final boolean first = i == 0, last = i == (expressions.length - 1);
+            final Expression<String> expression = expressions[i];
+            if (first && last) {
+                result = expression;
+            } else if (first) {
+                result = cb.concat(expression, delimiter);
+            } else {
+                result = cb.concat(result, expression);
+                if (!last) {
+                    result = cb.concat(result, delimiter);
+                }
+            }
         }
+        return result;
     }
 
-    private void fillExternalData(Account object) throws DaoException {
-        fillFriends(object);
-        setPassword(object);
-    }
-
-    private void collectExternalData(Account object) throws DaoException {
-        object.setFriendList(getAllFriends(object));
-    }
-
-    private List<Account> getAllFriends(Account object) throws DaoException {
-        List<Integer> friendsId = getAllFriendsId(object.getId());
-        List<Account> result = new ArrayList<>(friendsId.size());
-        for (Integer i : friendsId) {
-            result.add(getByPK(i));
-        }
-
-        return result.size() > 0 ? result : null;
-    }
-
-    private List<Integer> getAllFriendsId(int id) {
-        String sql = "SELECT * FROM Friends WHERE Account_id=" + id;
-        List<Integer> result = new LinkedList<>();
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-        for (Map<String, Object> row : rows) {
-            result.add((Integer) row.get("Friend_id"));
-        }
+    private List<Object[]> permute(String[] input) {
+        List<Object[]> result = new LinkedList<>();
+        permute(input, 0, result);
 
         return result;
     }
 
-    private void fillFriends(Account object) throws DaoException {
-        List<Account> friends = object.getFriendList();
-        int id = object.getId();
-        if (friends != null && friends.size() > 0) {
-            List<Integer> friendsIdFromDb = getAllFriendsId(id);
-            List<Integer> objectFriendsId = new ArrayList<>();
-            for (Account f : friends) {
-                objectFriendsId.add(f.getId());
-                if (!friendsIdFromDb.contains(f.getId())) {
-                    String sql = "INSERT INTO Friends (Account_id, Friend_id) VALUES(?,?)";
-                    jdbcTemplate.update(sql, id, f.getId());
-                }
+    private void permute(String[] input, int k, List<Object[]> result) {
+        if (k == input.length) {
+            List<String> temp = new LinkedList<>();
+            for (int i = 0; i < input.length; i++) {
+                temp.add(input[i]);
             }
-
-            for (Integer friendId : friendsIdFromDb) {
-                if (!objectFriendsId.contains(friendId)) {
-                    String sql = "DELETE FROM Friends WHERE Account_id= ? AND Friend_id= ?";
-                    jdbcTemplate.update(sql, id, friendId);
-                }
-            }
+            result.add(temp.toArray());
         } else {
-            String sql = "DELETE FROM Friends WHERE Account_id= ?";
-            jdbcTemplate.update(sql, id);
-        }
-    }
+            for (int i = k; i < input.length; i++) {
+                String temp = input[k];
+                input[k] = input[i];
+                input[i] = temp;
 
-    public List<AccountDTO> findByPartName(String query) throws DaoException { // done: 14.10.2017 возможен sql injection, защититься
-        String sql = "SELECT * FROM accounts WHERE \n" +
-                "REPLACE(CONCAT_WS('', name, middleName, surName), ' ', '') LIKE ? OR\n" +
-                "REPLACE(CONCAT_WS('', surName, middleName, name), ' ', '') LIKE ? OR\n" +
-                "REPLACE(CONCAT_WS('', name, surName, middleName), ' ', '') LIKE ? OR\n" +
-                "REPLACE(CONCAT_WS('', middleName, surName, name), ' ', '') LIKE ? OR\n" +
-                "REPLACE(CONCAT_WS('', middleName, name, surName), ' ', '') LIKE ? OR\n" +
-                "REPLACE(CONCAT_WS('', surName, name, middleName), ' ', '') LIKE ?";
-        Object[] preparedQuery = getPreparedQuery(query, 6);
+                permute(input, k + 1, result);
 
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(AccountDTO.class), preparedQuery);
-    }
-
-    public List<List<String>> combinations(List<String> input) {
-        return step(input, input.size(), new ArrayList<>());
-    }
-
-    public List<List<String>> step(List<String> input, int k, List<List<String>> result) {
-        // end
-        if (k == 0) {
-            return result;
-        }
-
-        // Start with [[1], [2], [3]] in result
-        if (result.size() == 0) {
-            for (String i : input) {
-                ArrayList<String> subList = new ArrayList<>();
-                subList.add(i);
-                result.add(subList);
+                temp = input[k];
+                input[k] = input[i];
+                input[i] = temp;
             }
-
-            // Around we go again.
-            return step(input, k - 1, result);
-        }
-
-        // Cross result with input.  Taking us to 2 entries per sub list.  Then 3. Then...
-        List<List<String>> newResult = new ArrayList<>();
-        for (List<String> subList : result) {
-            for (String i : input) {
-                List<String> newSubList = new ArrayList<>();
-                newSubList.addAll(subList);
-                newSubList.add(i);
-                newResult.add(newSubList);
-            }
-        }
-
-        // Around we go again.
-        return step(input, k - 1, newResult);
-    }
-
-    private String[] getPreparedQuery(String query, int count) {
-        query = query.replaceAll("\\s", "");
-        query = "%" + query + "%";
-        String[] preparedQuery = new String[count];
-        for (int i = 0; i < count; i++) {
-            preparedQuery[i] = query;
-        }
-
-        return preparedQuery;
-    }
-
-    private boolean setPassword(Account account) throws DaoException {
-        String sql;
-        if (getPassword(account) == null) {
-            sql = "INSERT INTO Email_password (password, Account_email) VALUES(?,?)";
-        } else {
-            sql = "UPDATE Email_password SET password= ? WHERE Account_email= ?";
-        }
-
-        return jdbcTemplate.update(sql, BCrypt.hashpw(account.getPassword(), BCrypt.gensalt()), account.getEmail()) > 0;
-    }
-
-    public String getPassword(Account account) throws DaoException {
-        return getPassword(account.getEmail());
-    }
-
-    public String getPassword(String email) throws DaoException {
-        String sql = "SELECT password FROM Email_password WHERE Account_email= ? ";
-        try {
-            return jdbcTemplate.queryForObject(sql, new RowMapper<String>() {
-                @Override
-                public String mapRow(ResultSet resultSet, int i) throws SQLException {
-                    return resultSet.getString("password");
-                }
-            }, email);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
-    }
-
-    public boolean isPasswordMatch(String email, String password, boolean isEncrypted) throws DaoException {
-        String dbPassword = getPassword(email);
-        if (dbPassword != null) {
-            if (isEncrypted) {
-                return dbPassword.equals(password);
-            } else {
-                return BCrypt.checkpw(password, dbPassword);
-            }
-        } else {
-            return false;
-        }
-    }
-
-    public Account getByEmail(String email) throws DaoException {
-        String sql = "SELECT * FROM Accounts WHERE email=?";
-        try {
-            return this.jdbcTemplate.queryForObject(sql, new RowMapper<Account>() {
-                @Override
-                public Account mapRow(ResultSet resultSet, int i) throws SQLException {
-                    try {
-                        return parseResultSet(resultSet);
-                    } catch (DaoException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            }, email);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
         }
     }
 }

@@ -42,8 +42,9 @@ function modalController() {
 }
 
 function maskPhoneNumber() {
-    $('.phone').find('input[name$="number"]').mask("+7 (999) 999 99 99");
-    $('.phone').find('input[name$="number"]').keydown(function (e) {
+    var phone = $('.phone').find('input[name$="number"]');
+    phone.mask("+7 (999) 999 99 99");
+    phone.keydown(function (e) {
         var oldvalue = $(this).val();
         var field = this;
         setTimeout(function () {
@@ -58,6 +59,7 @@ function addButtonClick() {
     var $lastPhone = $('.phone:last');
     var $clone = $lastPhone.clone();
 
+    $clone.find('input[name$="id"]').val("0");
     $clone.find('input[name$="number"]').val("+7");
     $clone.find('select[name$="type"]').val('MOBILE');
     $lastPhone.find('[name="add_button"]').css("display", "none");
@@ -79,7 +81,7 @@ function updatePhonesInputNames() {
 
     $('select[name$="type"]').each(function (index) {
         $(this).attr('name', "phones[" + index + "].type");
-        $(this).attr('id', "phones[" + index + "].number");
+        $(this).attr('id', "phones[" + index + "].type");
     });
 }
 

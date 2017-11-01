@@ -10,9 +10,21 @@
 <html>
 <head>
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
-    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/body.css" />">
+    <link rel="stylesheet" href="<c:url value="/plugins/simplePagination/simplePagination.css" />">
+
+    <script src="<c:url value="/plugins/simplePagination/jquery.simplePagination.js"/>"></script>
 </head>
 <body>
+<script>
+    $(document).ready(function () {
+        $('#compact-pagination').pagination({
+            items: 100,
+            itemsOnPage: 2,
+            cssStyle: 'light-theme'
+        });
+    });
+</script>
 <div class="fixed-centered container">
     <div class="row row-top">
         <div class="col-xs-2">
@@ -33,26 +45,56 @@
             </ul>
         </div>
         <div class="col-xs-7">
-            <div class="well">
-                <label>Found accounts:</label>
-                <table class="table">
-                    <c:forEach var="account" items="${accounts}">
-                        <c:if test="${not empty account}">
-                            <tr>
-                                <td>
-                                    <img width="100px" alt="Avatar" src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>
-                                    <a href="<c:url value="/account?id=${account.id}"/>">
-                                            ${account.name} ${account.surName}
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:if>
-                    </c:forEach>
-                </table>
-            </div>
+            <ul class="list-group">
+                <li>
+                    <div class="well">
+                        <label>Found accounts:</label>
+                    </div>
+                </li>
+                <c:forEach var="account" items="${accounts}">
+                    <c:if test="${not empty account}">
+                        <li>
+                            <div class="well">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <img width="100px" alt="Avatar"
+                                             src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>
+                                    </div>
+                                    <div class="col-xs-9">
+                                        <a href="<c:url value="/account?id=${account.id}"/>">
+                                                ${account.name} ${account.middleName} ${account.surName}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </c:if>
+                </c:forEach>
+                <li>
+                    <div class="well">
+                        <div id="compact-pagination" class="pagination"></div>
+                    </div>
+                </li>
+            </ul>
+            <%--<label>Found accounts:</label>--%>
+            <%--<table class="table">--%>
+            <%--<c:forEach var="account" items="${accounts}">--%>
+            <%--<c:if test="${not empty account}">--%>
+            <%--<tr>--%>
+            <%--<td>--%>
+            <%--<img width="100px" alt="Avatar"--%>
+            <%--src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>--%>
+            <%--<a href="<c:url value="/account?id=${account.id}"/>">--%>
+            <%--${account.name} ${account.surName}--%>
+            <%--</a>--%>
+            <%--</td>--%>
+            <%--</tr>--%>
+            <%--</c:if>--%>
+            <%--</c:forEach>--%>
+            <%--</table>--%>
         </div>
-        <div class="col-xs-3">
-        </div>
+    </div>
+    <div class="col-xs-3">
     </div>
 </div>
 <%--<table>

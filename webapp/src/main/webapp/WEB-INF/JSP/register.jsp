@@ -11,7 +11,7 @@
 <html>
 <head>
     <jsp:include page="/WEB-INF/JSP/header.jsp"/>
-    <link rel="stylesheet" href="<c:url value="/CSS/body.css" />">
+    <link rel="stylesheet" href="<c:url value="/css/body.css" />">
 </head>
 <body>
 <div class="fixed-centered container">

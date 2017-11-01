@@ -1,22 +1,23 @@
 package com.gjjbook.servlet;
 
+import com.gjjbook.dao.DaoException;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
+import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
+import com.gjjbook.domain.Sex;
 import com.gjjbook.service.AccountService;
-import com.gjjbook.service.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -29,6 +30,8 @@ import java.util.Map;
 @SessionAttributes("loggedUser")
 @MultipartConfig(maxFileSize = 1_617_721)
 public class MainController {
+
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @Autowired
     private AccountService service;
@@ -45,7 +48,7 @@ public class MainController {
                                           @RequestParam(value = "email", required = false) String paramEmail,
                                           @RequestParam(value = "password", required = false) String paramPassword,
                                           @RequestParam(value = "rememberMe", required = false) Object rememberMe,
-                                          HttpServletResponse response) throws ServletException {
+                                          HttpServletResponse response) {
         boolean isEncrypted = true;
         ModelAndView modelAndView;
 
@@ -59,29 +62,30 @@ public class MainController {
             modelAndView = new ModelAndView("/login");
             modelAndView.addObject("errMsg", "Please Enter Username and Password");
         } else {
-            try {
-                if (service.isPasswordMatch(email, password, isEncrypted)) {
-                    Account loggedUser = service.getByEmail(email);
-                    if (rememberMe != null) {
-                        response.addCookie(new Cookie("email", email));
-                        if (!isEncrypted) {
-                            password = service.getPassword(loggedUser);
-                        }
-                        response.addCookie(new Cookie("password", password));
+            if (service.isPasswordMatch(email, password, isEncrypted)) {
+                Account loggedUser = service.getByEmail(email);
+                if (rememberMe != null) {
+                    response.addCookie(new Cookie("email", email));
+                    if (!isEncrypted) {
+                        password = loggedUser.getPassword();
                     }
-
-                    if (path == null) {
-                        path = "/account?id=" + loggedUser.getId();
-                    }
-                    modelAndView = new ModelAndView("redirect:" + path);
-                    modelAndView.addObject("loggedUser", loggedUser);
-                } else {
-                    modelAndView = new ModelAndView("/login");
-                    modelAndView.addObject("errMsg", "Email/password does not match");
+                    response.addCookie(new Cookie("password", password));
                 }
-            } catch (ServiceException e) {
-                throw new ServletException(e);
+
+                if (path == null) {
+                    path = "/account?id=" + loggedUser.getId();
+                }
+                modelAndView = new ModelAndView("redirect:" + path);
+                modelAndView.addObject("loggedUser", loggedUser);
+
+                logger.info("Account with id=" + loggedUser.getId() + " logged in"); // TODO: 30.10.2017 add IP
+            } else {
+                modelAndView = new ModelAndView("/login");
+                modelAndView.addObject("errMsg", "Email/password does not match");
+
+                logger.info("Someone tried to login with no luck"); // TODO: 30.10.2017 add IP
             }
+
         }
 
         return modelAndView;
@@ -89,24 +93,21 @@ public class MainController {
 
     @RequestMapping(value = "/account", method = RequestMethod.GET)
     public ModelAndView showAccount(@RequestParam("id") Integer idParam,
-                                    HttpServletResponse resp) throws IOException, ServletException {
+                                    HttpServletResponse resp) throws IOException {
         ModelAndView modelAndView = new ModelAndView("accountView");
 
         if (idParam == null) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return null;
         } else {
-            try {
-                Account account = service.getByPk(idParam);
-                if (account == null) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return null;
-                } else {
-                    modelAndView.addObject("account", account);
-                    modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
-                }
-            } catch (ServiceException e) {
-                throw new ServletException(e);
+            Account account = service.getByPk(idParam);
+
+            if (account == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            } else {
+                modelAndView.addObject("account", account);
+                modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
             }
 
             return modelAndView;
@@ -116,7 +117,7 @@ public class MainController {
     @RequestMapping(value = "/editaccount", method = RequestMethod.GET)
     public ModelAndView editAccount(@RequestParam(value = "id") Integer idParam,
                                     @SessionAttribute("loggedUser") Account loggedUser,
-                                    HttpServletResponse resp) throws IOException, ServletException {
+                                    HttpServletResponse resp) throws IOException {
         ModelAndView modelAndView = new ModelAndView("editAccount");
 
         if (idParam == null) {
@@ -124,18 +125,15 @@ public class MainController {
         } else if (!idParam.equals(loggedUser.getId())) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
         } else {
-            try {
-                Account account = service.getByPk(idParam);
-                if (account == null) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return null;
-                } else {
-                    modelAndView.addObject("account", account);
-                    modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
-                }
-            } catch (ServiceException e) {
-                throw new ServletException(e);
+            Account account = service.getByPk(idParam);
+            if (account == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return null;
+            } else {
+                modelAndView.addObject("account", account);
+                modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
             }
+
         }
 
         return modelAndView;
@@ -143,6 +141,9 @@ public class MainController {
 
     @InitBinder("account")
     public void customAccountModel(WebDataBinder binder) {
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        sdf.setLenient(true);
+//        binder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, true));
         binder.registerCustomEditor(LocalDate.class, "birthDate", new PropertyEditorSupport() {
             @Override
             public String getAsText() {
@@ -167,13 +168,25 @@ public class MainController {
                 setValue(PhoneType.valueOf(text));
             }
         });
+        binder.registerCustomEditor(Sex.class, "sex", new PropertyEditorSupport() {
+            @Override
+            public String getAsText() {
+                Sex sex = (Sex) getValue();
+                return sex.name();
+            }
+
+            @Override
+            public void setAsText(String text) throws IllegalArgumentException {
+                setValue(Sex.valueOf(text));
+            }
+        });
         binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
     }
 
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
-                                      HttpServletResponse resp) throws IOException, ServletException {
+                                      HttpServletResponse resp) throws IOException, DaoException {
         if (!account.getId().equals(loggedUser.getId())) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
@@ -182,11 +195,11 @@ public class MainController {
                 account.setAvatar(loggedUser.getAvatar());
             }
 
-            try {
-                service.update(account);
-            } catch (ServiceException e) {
-                throw new ServletException(e);
+            for (Phone p : account.getPhones()) {
+                p.setOwner(account);
             }
+
+            service.update(account);
 
             return new ModelAndView("redirect:/account?id=" + account.getId());
         }
@@ -202,41 +215,30 @@ public class MainController {
     }
 
     @RequestMapping(value = "/account_registration", method = RequestMethod.POST)
-    public ModelAndView accountRegistration(@ModelAttribute("account") Account account) throws ServletException {
-        try {
-            service.create(account);
-        } catch (ServiceException e) {
-            throw new ServletException(e);
-        }
+    public ModelAndView accountRegistration(@ModelAttribute("account") Account account) throws DaoException {
+        service.update(account);
 
         return new ModelAndView("redirect:/login");
     }
 
     @RequestMapping(value = "/search")
-    public ModelAndView search(@RequestParam("q") String query) throws ServletException {
+    public ModelAndView search(@RequestParam("q") String query) {
         ModelAndView modelAndView = new ModelAndView("searchResults");
-        try {
-            List<AccountDTO> accounts = service.findByPartName(query);
-            Map<Integer, String> encodedAvatars = new HashMap<>();
-            for (AccountDTO a : accounts) {
-                encodedAvatars.put(a.getId(), service.convertByteAvatarToString(a.getAvatar()));
-            }
-            modelAndView.addObject("accounts", accounts);
-            modelAndView.addObject("encodedAvatars", encodedAvatars);
-        } catch (ServiceException e) {
-            throw new ServletException(e);
+
+        List<AccountDTO> accounts = service.findByPartName(query);
+        Map<Integer, String> encodedAvatars = new HashMap<>();
+        for (AccountDTO a : accounts) {
+            encodedAvatars.put(a.getId(), service.convertByteAvatarToString(a.getAvatar()));
         }
+        modelAndView.addObject("accounts", accounts);
+        modelAndView.addObject("encodedAvatars", encodedAvatars);
 
         return modelAndView;
     }
 
     @RequestMapping(value = "/quickSearch")
     @ResponseBody
-    public List<AccountDTO> quickSearch(@RequestParam("q") String query) throws ServletException {
-        try {
-            return service.findByPartName(query);
-        } catch (ServiceException e) {
-            throw new ServletException(e);
-        }
+    public List<AccountDTO> quickSearch(@RequestParam("q") String query) {
+        return service.findByPartName(query);
     }
 }

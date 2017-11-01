@@ -9,9 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.io.FileReader;
@@ -34,11 +35,7 @@ public class AccountDaoTest {
         Connection connection = dataSource.getConnection();
         FileReader fr = new FileReader("src/test/resources/createAccounts.sql");
         RunScript.execute(connection, fr);
-        fr = new FileReader("src/test/resources/createPhones.sql");
-        RunScript.execute(connection, fr);
         fr = new FileReader("src/test/resources/createFriends.sql");
-        RunScript.execute(connection, fr);
-        fr = new FileReader("src/test/resources/createEmailPassword.sql");
         RunScript.execute(connection, fr);
         connection.close();
     }
@@ -57,13 +54,16 @@ public class AccountDaoTest {
     }
 
     @Test
+    @Transactional
     public void create() throws Exception, DaoException {
         Account newAcc = createTestAccount();
 
         Assert.assertNotNull(newAcc);
+        Assert.assertEquals(new Integer(1), newAcc.getId());
     }
 
     @Test
+    @Transactional
     public void getByPK() throws Exception, DaoException {
         Account newAcc = createTestAccount();
 
@@ -72,6 +72,7 @@ public class AccountDaoTest {
     }
 
     @Test
+    @Transactional
     public void update() throws Exception, DaoException {
         Account newAcc = createTestAccount();
         newAcc.setName("petr");
@@ -81,6 +82,7 @@ public class AccountDaoTest {
     }
 
     @Test
+    @Transactional
     public void delete() throws Exception, DaoException {
         Account newAcc = createTestAccount();
         accountDao.delete(newAcc);
@@ -89,6 +91,7 @@ public class AccountDaoTest {
     }
 
     @Test
+    @Transactional
     public void getAll() throws Exception, DaoException {
         List<Account> list = new LinkedList<>();
         list.add(createTestAccount("1"));
@@ -103,9 +106,9 @@ public class AccountDaoTest {
                 Sex.MALE, LocalDate.of(2000, 10, 20),
                 null, "home", "work",
                 email, "7894", "skype",
-                null, null, null);
+                null, null, "123");
 
-        return accountDao.create(account);
+        return accountDao.update(account);
     }
 
     private Account createTestAccount() throws DaoException {

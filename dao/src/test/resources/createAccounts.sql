@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `Accounts` (
   `skype` VARCHAR(45) NULL,
   `additionalinfo` VARCHAR(45) NULL,
   `avatar` MEDIUMBLOB NULL,
-  PRIMARY KEY (`id`, `email`),
+  `password` VARCHAR(64) NOT NULL,
+  PRIMARY KEY (`id`),
   UNIQUE INDEX `email_UNIQUE` (`email` ASC),
   UNIQUE INDEX `id_UNIQUE` (`id` ASC))
