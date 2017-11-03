@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `Accounts` (
   `name` VARCHAR(45) NOT NULL,
   `middlename` VARCHAR(45) NULL,
   `surname` VARCHAR(45) NOT NULL,
-  `sex` VARCHAR(45) NOT NULL,
+  `gender` VARCHAR(45) NOT NULL,
   `birthdate` DATE NOT NULL,
   `homeaddress` VARCHAR(45) NULL,
   `workaddress` VARCHAR(45) NULL,

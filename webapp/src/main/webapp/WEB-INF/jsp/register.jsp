@@ -10,7 +10,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <jsp:include page="/WEB-INF/jsp/header.jsp"/>
     <link rel="stylesheet" href="<c:url value="/css/body.css" />">
 </head>
 <body>
@@ -45,8 +45,8 @@
                             <td><input type="text" id="surName" name="surName" placeholder="Surname" required></td>
                         </tr>
                         <tr>
-                            <td><input type="radio" name="sex" checked value="MALE"> Male
-                                <input type="radio" name="sex" value="FEMALE"> Female
+                            <td><input type="radio" name="gender" checked value="MALE"> Male
+                                <input type="radio" name="gender" value="FEMALE"> Female
                             </td>
                             <td></td>
                         </tr>

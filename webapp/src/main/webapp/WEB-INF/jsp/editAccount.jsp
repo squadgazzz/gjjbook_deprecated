@@ -11,7 +11,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <jsp:include page="/WEB-INF/jsp/header.jsp"/>
 
     <script src="<c:url value="/webjars/jquery/3.2.1/jquery.min.js"/>"></script>
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
@@ -54,7 +54,7 @@
                     <div class="col-xs-12 col-left" align="center">
                         <div class="well">
                             <img width="100%" alt="Avatar"
-                                 src="data:image/jpeg;base64,${avatar}"/><br/><br/>
+                                 src="data:image/jpeg;base64,${account.stringAvatar}"/><br/><br/>
                             <input type="file" name="avatar" class="file">
                         </div>
                     </div>
@@ -103,10 +103,10 @@
                             <div class="form-group">
                                 <label class="control-label col-sm-3">Gender*:</label>
                                 <div class="col-sm-9">
-                                    <input type="radio" name="sex"
-                                           <c:if test="${account.sex=='MALE'}">checked</c:if> value="MALE"> Male
-                                    <input type="radio" name="sex"
-                                           <c:if test="${account.sex=='FEMALE'}">checked</c:if> value="FEMALE">
+                                    <input type="radio" name="gender"
+                                           <c:if test="${account.gender=='MALE'}">checked</c:if> value="MALE"> Male
+                                    <input type="radio" name="gender"
+                                           <c:if test="${account.gender=='FEMALE'}">checked</c:if> value="FEMALE">
                                     Female
                                 </div>
                             </div>

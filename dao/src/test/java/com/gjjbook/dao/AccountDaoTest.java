@@ -1,7 +1,7 @@
 package com.gjjbook.dao;
 
 import com.gjjbook.domain.Account;
-import com.gjjbook.domain.Sex;
+import com.gjjbook.domain.Gender;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Assert;
@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -103,7 +102,7 @@ public class AccountDaoTest {
     private Account createTestAccount(String email) throws DaoException {
         byte[] avatar = {1, 2, 3};
         Account account = new Account(avatar, "ivan", null, "ivanov",
-                Sex.MALE, LocalDate.of(2000, 10, 20),
+                Gender.MALE, LocalDate.of(2000, 10, 20),
                 null, "home", "work",
                 email, "7894", "skype",
                 null, null, "123");

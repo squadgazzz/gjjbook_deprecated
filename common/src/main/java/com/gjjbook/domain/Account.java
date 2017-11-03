@@ -3,6 +3,7 @@ package com.gjjbook.domain;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Entity
@@ -18,7 +19,7 @@ public class Account implements Identified<Integer> {
     private String middleName;
     private String surName;
     @Enumerated(EnumType.STRING)
-    private Sex sex;
+    private Gender gender;
     private LocalDate birthDate;
     @OneToMany
             (
@@ -63,12 +64,12 @@ public class Account implements Identified<Integer> {
         phone.setOwner(null);
     }
 
-    public Account(byte[] avatar, String name, String middleName, String surName, Sex sex, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, String password) {
+    public Account(byte[] avatar, String name, String middleName, String surName, Gender gender, LocalDate birthDate, List<Phone> phones, String homeAddress, String workAddress, String email, String icq, String skype, String additionalInfo, List<Account> friendList, String password) {
         this.avatar = avatar;
         this.name = name;
         this.middleName = middleName;
         this.surName = surName;
-        this.sex = sex;
+        this.gender = gender;
         this.birthDate = birthDate;
         this.phones = phones;
         this.homeAddress = homeAddress;
@@ -121,12 +122,12 @@ public class Account implements Identified<Integer> {
         this.surName = surName;
     }
 
-    public Sex getSex() {
-        return sex;
+    public Gender getGender() {
+        return gender;
     }
 
-    public void setSex(Sex sex) {
-        this.sex = sex;
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
     public LocalDate getBirthDate() {
@@ -207,6 +208,14 @@ public class Account implements Identified<Integer> {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getStringAvatar() {
+        if (avatar == null) {
+            return null;
+        }
+
+        return Base64.getEncoder().encodeToString(avatar);
     }
 
     @Override

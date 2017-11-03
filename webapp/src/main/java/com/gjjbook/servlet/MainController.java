@@ -3,9 +3,9 @@ package com.gjjbook.servlet;
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
+import com.gjjbook.domain.Gender;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
-import com.gjjbook.domain.Sex;
 import com.gjjbook.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +16,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.support.ByteArrayMultipartFileEditor;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Properties;
 
 @Controller
 @SessionAttributes("loggedUser")
@@ -131,7 +132,6 @@ public class MainController {
                 return null;
             } else {
                 modelAndView.addObject("account", account);
-                modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
             }
 
         }
@@ -168,16 +168,16 @@ public class MainController {
                 setValue(PhoneType.valueOf(text));
             }
         });
-        binder.registerCustomEditor(Sex.class, "sex", new PropertyEditorSupport() {
+        binder.registerCustomEditor(Gender.class, "sex", new PropertyEditorSupport() {
             @Override
             public String getAsText() {
-                Sex sex = (Sex) getValue();
-                return sex.name();
+                Gender gender = (Gender) getValue();
+                return gender.name();
             }
 
             @Override
             public void setAsText(String text) throws IllegalArgumentException {
-                setValue(Sex.valueOf(text));
+                setValue(Gender.valueOf(text));
             }
         });
         binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
@@ -222,23 +222,42 @@ public class MainController {
     }
 
     @RequestMapping(value = "/search")
-    public ModelAndView search(@RequestParam("q") String query) {
+    public ModelAndView search(@RequestParam("q") String query) throws ServletException {
         ModelAndView modelAndView = new ModelAndView("searchResults");
+        try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("search.properties"))) {
+            Properties properties = new Properties();
+            properties.load(is);
+            int pageSize = Integer.parseInt(properties.getProperty("PAGE_SIZE"));
+            long searchResultCount = service.getSearchResultCount(query);
 
-        List<AccountDTO> accounts = service.findByPartName(query);
-        Map<Integer, String> encodedAvatars = new HashMap<>();
-        for (AccountDTO a : accounts) {
-            encodedAvatars.put(a.getId(), service.convertByteAvatarToString(a.getAvatar()));
+            System.out.println(searchResultCount);
+
+            List<AccountDTO> accounts = service.findByPartName(query, 1, pageSize);
+
+            modelAndView.addObject("accounts", accounts);
+            modelAndView.addObject("searchResultCount", searchResultCount);
+            modelAndView.addObject("pageSize", pageSize);
+            modelAndView.addObject("query", query);
+        } catch (IOException e) {
+            throw new ServletException(e);
         }
-        modelAndView.addObject("accounts", accounts);
-        modelAndView.addObject("encodedAvatars", encodedAvatars);
 
         return modelAndView;
     }
 
     @RequestMapping(value = "/quickSearch")
     @ResponseBody
-    public List<AccountDTO> quickSearch(@RequestParam("q") String query) {
-        return service.findByPartName(query);
+    public List<AccountDTO> quickSearch(@RequestParam("q") String query,
+                                        @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                        @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+        if (currentPage == null) {
+            currentPage = 0;
+        }
+
+        if (pageSize == null) {
+            pageSize = 10;
+        }
+
+        return service.findByPartName(query, currentPage, pageSize);
     }
 }

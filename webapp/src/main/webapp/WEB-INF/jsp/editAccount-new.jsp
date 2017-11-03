@@ -11,7 +11,7 @@
 <html>
 <head>
     <%--сделать кеширование css\js, проверить, что это будет работать через томкат из cmd--%>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <jsp:include page="/WEB-INF/jsp/header.jsp"/>
     <script src="<c:url value="/js/editAccount.js" />"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>

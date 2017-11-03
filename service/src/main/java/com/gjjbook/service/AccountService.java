@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Base64;
 import java.util.List;
@@ -127,11 +126,19 @@ public class AccountService implements Serviceable<Account, Integer> {
         this.phoneDao = phoneDao;
     }
 
-    public List<AccountDTO> findByPartName(String query) {
+    public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
         if (query == null) {
             return null;
         }
 
-        return accountDao.findByPartName(query);
+        return accountDao.findByPartName(query, currentPage, pageSize);
+    }
+
+    public long getSearchResultCount(String query) {
+        if (query == null) {
+            return 0;
+        }
+
+        return accountDao.getSearchResultCount(query);
     }
 }

@@ -3,7 +3,7 @@ package com.gjjbook.dao;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
 import com.gjjbook.domain.PhoneType;
-import com.gjjbook.domain.Sex;
+import com.gjjbook.domain.Gender;
 import org.h2.tools.RunScript;
 import org.junit.After;
 import org.junit.Assert;
@@ -19,7 +19,6 @@ import javax.sql.DataSource;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,7 +119,7 @@ public class PhoneDaoTest {
 
     private Phone createTestPhone(String number) throws DaoException {
         Account account = new Account(null, "ivan", null, "ivanov",
-                Sex.MALE, LocalDate.of(2000, 10, 20),
+                Gender.MALE, LocalDate.of(2000, 10, 20),
                 null, "home", "work",
                 number, "7894", "skype",
                 null, null, "123");

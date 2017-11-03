@@ -2,8 +2,8 @@ package com.gjjbook.dao;
 
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
+import com.gjjbook.domain.Gender;
 import com.gjjbook.domain.Phone;
-import com.gjjbook.domain.Sex;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Repository;
 
@@ -34,7 +34,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         if (account.getId().equals(0)) {
             byte[] avatar = account.getAvatar();
             if (avatar == null) {
-                account.setAvatar(getDefaultAvatar(account.getSex()));
+                account.setAvatar(getDefaultAvatar(account.getGender()));
             }
             List<Phone> phones = account.getPhones();
             account.setPhones(null);
@@ -123,9 +123,9 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         return false;
     }
 
-    private byte[] getDefaultAvatar(Sex sex) throws DaoException {
+    private byte[] getDefaultAvatar(Gender gender) throws DaoException {
         String fileName;
-        if (sex.equals(Sex.MALE)) {
+        if (gender.equals(Gender.MALE)) {
             fileName = "default-avatar-m.png";
         } else {
             fileName = "default-avatar-f.png";
@@ -150,14 +150,36 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         return image;
     }
 
-    public List<AccountDTO> findByPartName(String query) {
+    public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
         List<Object[]> queryList = permute(query.split(" "));
 //        String sql = "SELECT * FROM accounts WHERE \n" +
 //                "REPLACE(CONCAT_WS('', name, middleName, surName), ' ', '') LIKE ? OR\n" + ....
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
         CriteriaQuery<AccountDTO> criteriaQuery = cb.createQuery(AccountDTO.class);
         Root<AccountDTO> from = criteriaQuery.from(AccountDTO.class);
+        Predicate whereClause = getWhereClause(queryList, cb, from);
+
+        CriteriaQuery<AccountDTO> select = criteriaQuery.select(from).where(whereClause);
+        TypedQuery<AccountDTO> typedQuery = entityManager.createQuery(select);
+
+        return typedQuery.setFirstResult(currentPage * pageSize - pageSize).setMaxResults(pageSize).getResultList();
+    }
+
+    public long getSearchResultCount(String query) {
+        List<Object[]> queryList = permute(query.split(" "));
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<AccountDTO> from = countQuery.from(AccountDTO.class);
+        Predicate whereClause = getWhereClause(queryList, cb, from);
+
+        CriteriaQuery<Long> select = countQuery.select(cb.count(from)).where(whereClause);
+
+        return entityManager.createQuery(select).getSingleResult();
+    }
+
+    private Predicate getWhereClause(List<Object[]> queryList, CriteriaBuilder cb, Root<AccountDTO> from) {
         Expression<String> fullName = cb.concat(from.get("name"), "");
         fullName = cb.concat(fullName, from.get("middleName"));
         fullName = cb.concat(fullName, from.get("surName"));
@@ -174,30 +196,27 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             }
         }
 
-        CriteriaQuery<AccountDTO> select = criteriaQuery.select(from).where(whereClause);
-        TypedQuery<AccountDTO> typedQuery = entityManager.createQuery(select);
-
-        return typedQuery.getResultList();
+        return whereClause;
     }
 
-    private Expression<String> concat(CriteriaBuilder cb, String delimiter, Expression<String>... expressions) {
-        Expression<String> result = null;
-        for (int i = 0; i < expressions.length; i++) {
-            final boolean first = i == 0, last = i == (expressions.length - 1);
-            final Expression<String> expression = expressions[i];
-            if (first && last) {
-                result = expression;
-            } else if (first) {
-                result = cb.concat(expression, delimiter);
-            } else {
-                result = cb.concat(result, expression);
-                if (!last) {
-                    result = cb.concat(result, delimiter);
-                }
-            }
-        }
-        return result;
-    }
+//    private Expression<String> concatExpressions(CriteriaBuilder cb, String delimiter, Expression<String>... expressions) {
+//        Expression<String> result = null;
+//        for (int i = 0; i < expressions.length; i++) {
+//            final boolean first = i == 0, last = i == (expressions.length - 1);
+//            final Expression<String> expression = expressions[i];
+//            if (first && last) {
+//                result = expression;
+//            } else if (first) {
+//                result = cb.concat(expression, delimiter);
+//            } else {
+//                result = cb.concat(result, expression);
+//                if (!last) {
+//                    result = cb.concat(result, delimiter);
+//                }
+//            }
+//        }
+//        return result;
+//    }
 
     private List<Object[]> permute(String[] input) {
         List<Object[]> result = new LinkedList<>();
@@ -209,9 +228,8 @@ public class AccountDao extends AbstractDao<Account, Integer> {
     private void permute(String[] input, int k, List<Object[]> result) {
         if (k == input.length) {
             List<String> temp = new LinkedList<>();
-            for (int i = 0; i < input.length; i++) {
-                temp.add(input[i]);
-            }
+
+            temp.addAll(Arrays.asList(input));
             result.add(temp.toArray());
         } else {
             for (int i = k; i < input.length; i++) {

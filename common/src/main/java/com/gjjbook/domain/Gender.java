@@ -1,6 +1,6 @@
 package com.gjjbook.domain;
 
-public enum Sex {
+public enum Gender {
     MALE,
     FEMALE
 }

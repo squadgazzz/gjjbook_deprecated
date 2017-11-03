@@ -9,22 +9,17 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <jsp:include page="/WEB-INF/jsp/header.jsp"/>
     <link rel="stylesheet" href="<c:url value="/css/body.css" />">
     <link rel="stylesheet" href="<c:url value="/plugins/simplePagination/simplePagination.css" />">
 
     <script src="<c:url value="/plugins/simplePagination/jquery.simplePagination.js"/>"></script>
+    <script src="<c:url value="/js/paginator.js"/>"></script>
 </head>
 <body>
-<script>
-    $(document).ready(function () {
-        $('#compact-pagination').pagination({
-            items: 100,
-            itemsOnPage: 2,
-            cssStyle: 'light-theme'
-        });
-    });
-</script>
+<input id="searchResultCount" type="hidden" value="${searchResultCount}"/>
+<input id="pageSize" type="hidden" value="${pageSize}"/>
+<input id="query" type="hidden" value="${query}"/>
 <div class="fixed-centered container">
     <div class="row row-top">
         <div class="col-xs-2">
@@ -53,15 +48,15 @@
                 </li>
                 <c:forEach var="account" items="${accounts}">
                     <c:if test="${not empty account}">
-                        <li>
+                        <li name="foundAccount">
                             <div class="well">
                                 <div class="row">
                                     <div class="col-xs-3">
-                                        <img width="100px" alt="Avatar"
-                                             src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>
+                                        <img name="accountAvatar" width="100px" alt="Avatar"
+                                             src="data:image/jpeg;base64,${account.stringAvatar}"/>
                                     </div>
                                     <div class="col-xs-9">
-                                        <a href="<c:url value="/account?id=${account.id}"/>">
+                                        <a name="accountName" href="<c:url value="/account?id=${account.id}"/>">
                                                 ${account.name} ${account.middleName} ${account.surName}
                                         </a>
                                     </div>
@@ -70,7 +65,7 @@
                         </li>
                     </c:if>
                 </c:forEach>
-                <li>
+                <li name="paginator">
                     <div class="well">
                         <div id="compact-pagination" class="pagination"></div>
                     </div>

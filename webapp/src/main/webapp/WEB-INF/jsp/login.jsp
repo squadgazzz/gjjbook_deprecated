@@ -9,7 +9,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <jsp:include page="/WEB-INF/JSP/header.jsp"/>
+    <jsp:include page="/WEB-INF/jsp/header.jsp"/>
     <link rel="stylesheet" href="<c:url value="/css/body.css" />">
     <style>
         img.back {

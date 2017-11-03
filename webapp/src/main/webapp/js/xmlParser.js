@@ -11,7 +11,7 @@ function exportToXml() {
     data.push("\t<name>" + $('#name').val() + "</name>\n");
     data.push("\t<middleName>" + $('#middleName').val() + "</middleName>\n");
     data.push("\t<surName>" + $('#surName').val() + "</surName>\n");
-    data.push("\t<sex>" + $('input[name="sex"]').val() + "</sex>\n");
+    data.push("\t<gender>" + $('input[name="gender"]').val() + "</gender>\n");
     data.push("\t<birthDate>" + $('#birthDate').val() + "</birthDate>\n");
     data.push("\t<phones>\n");
     $('.phone').each(function () {
@@ -53,7 +53,7 @@ function importFromXml() {
             $('#name').val(getNodeValue(parser, "name"));
             $('#middleName').val(getNodeValue(parser, "middleName"));
             $('#surName').val(getNodeValue(parser, "surName"));
-            $('input[name="sex"]').val(getNodeValue(parser, "sex"));
+            $('input[name="gender"]').val(getNodeValue(parser, "gender"));
             $('#birthDate').val(getNodeValue(parser, "birthDate"));
 
             var xmlPhonesList = parser.getElementsByTagName("phone");

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug">
+
+    <Properties>
+        <Property name="LOG_PATTERN">
+            %d{yyyy-MM-dd HH:mm:ss.SSS} %5p ${hostName} --- [%15.15t] %-40.40c{1.} : %m%n%ex
+        </Property>
+        <Property name="log-path">logs</Property>
+        <Property name="log-name">node-${hostName}</Property>
+        <Property name="archive">${log-path}/archive</Property>
+        <Property name="show_sql">true</Property>
+        <Property name="format_sql">true</Property>
+        <Property name="use_sql_comments">true</Property>
+    </Properties>
+
+    <!--<ThresholdFilter level="trace"/>-->
+
+    <Appenders>
+        <Console name="Consoler" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <Console name="SqlConsoler" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+        <File name="File" fileName="/gjjbook.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </File>
+        <File name="SqlFile" fileName="/sql.log">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="com.gjjbook" level="info" additivity="false">
+            <AppenderRef ref="File"/>
+        </Logger>
+        <Logger name="org.hibernate.SQL" level="debug">
+            <AppenderRef ref="Consoler"/>
+            <AppenderRef ref="SqlFile"/>
+        </Logger>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="trace">
+            <AppenderRef ref="Consoler"/>
+            <AppenderRef ref="SqlFile"/>
+        </Logger>
+        <Logger name="server.tomcat.accessLogEnabled" level="debug" additivity="false">
+            <!--<AppenderRef ref="Consoler"/>-->
+        </Logger>
+        <Root level="info">
+            <!--<AppenderRef ref="SqlConsoler"/>-->
+        </Root>
+
+    </Loggers>
+
+</Configuration>
+
+
+        <!--appender-->
+
+        <!-- Will generate up to 10 log files for a given day. During every rollover it will delete
+             those that are older than 60 days, but keep the most recent 10 GB -->
+        <!--<RollingFile name="RollingFile-Appender"-->
+        <!--fileName="${log-path}/${log-name}.log"-->
+        <!--filePattern="${archive}/${log-name}.%d{yyyy-MM-dd}-%i.log.gz">-->
+
+        <!--<PatternLayout pattern="[%-5level] %d{ISO8601}{GMT+0} [%t] %c{1} - %msg%n"/>-->
+
+        <!--<Policies>-->
+        <!--<TimeBasedTriggeringPolicy/>-->
+        <!--<SizeBasedTriggeringPolicy size="10MB"/>-->
+        <!--</Policies>-->
+
+        <!--<DefaultRolloverStrategy min="1" max="10">-->
+        <!--<Delete basePath="${archive}" maxDepth="1">-->
+        <!--<IfFileName glob="${log-name}*.log.gz"/>-->
+        <!--<IfLastModified age="60d">-->
+        <!--<IfAny>-->
+        <!--<IfAccumulatedFileSize exceeds="10 GB"/>-->
+        <!--</IfAny>-->
+        <!--</IfLastModified>-->
+        <!--</Delete>-->
+        <!--</DefaultRolloverStrategy>-->
+
+        <!--</RollingFile>-->
+
+
+        <!--logger-->
+
+        <!--<Root level="info">-->
+        <!--<AppenderRef ref="Console-Appender"/>-->
+        <!--<AppenderRef ref="RollingFile-Appender"/>-->
+        <!--</Root>-->
+        <!--<Logger name="net.corda" level="info" additivity="false">-->
+        <!--<AppenderRef ref="Console-Appender"/>-->
+        <!--<AppenderRef ref="RollingFile-Appender"/>-->
+        <!--</Logger>-->

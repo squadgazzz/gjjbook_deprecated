@@ -3,6 +3,7 @@ package com.gjjbook.domain.DTO;
 import com.gjjbook.domain.Identified;
 
 import javax.persistence.*;
+import java.util.Base64;
 
 @Entity
 @Table(name = "accounts")
@@ -66,6 +67,14 @@ public class AccountDTO implements Identified<Integer> {
 
     public void setSurName(String surName) {
         this.surName = surName;
+    }
+
+    public String getStringAvatar() {
+        if (avatar == null) {
+            return null;
+        }
+
+        return Base64.getEncoder().encodeToString(avatar);
     }
 
 
