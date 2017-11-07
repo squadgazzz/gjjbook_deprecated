@@ -11,7 +11,7 @@ function exportToXml() {
     data.push("\t<name>" + $('#name').val() + "</name>\n");
     data.push("\t<middleName>" + $('#middleName').val() + "</middleName>\n");
     data.push("\t<surName>" + $('#surName').val() + "</surName>\n");
-    data.push("\t<gender>" + $('input[name="gender"]').val() + "</gender>\n");
+    data.push("\t<gender>" + $('input[name="gender"]:checked').val() + "</gender>\n");
     data.push("\t<birthDate>" + $('#birthDate').val() + "</birthDate>\n");
     data.push("\t<phones>\n");
     $('.phone').each(function () {
@@ -53,7 +53,7 @@ function importFromXml() {
             $('#name').val(getNodeValue(parser, "name"));
             $('#middleName').val(getNodeValue(parser, "middleName"));
             $('#surName').val(getNodeValue(parser, "surName"));
-            $('input[name="gender"]').val(getNodeValue(parser, "gender"));
+            $('input[name="gender"]').filter('[value="' + getNodeValue(parser, "gender") + '"]').attr('checked', true);
             $('#birthDate').val(getNodeValue(parser, "birthDate"));
 
             var xmlPhonesList = parser.getElementsByTagName("phone");
@@ -88,11 +88,13 @@ function importFromXml() {
             $('#email').val(getNodeValue(parser, "email"));
             $('#password').val(getNodeValue(parser, "password"));
         };
-
-        $('input[name="confirm-changes"]').click();
     });
 }
 
 function getNodeValue(parser, name) {
-    return parser.getElementsByTagName(name)[0].childNodes[0].nodeValue;
+    if (parser.getElementsByTagName(name)[0].hasChildNodes()) {
+        return parser.getElementsByTagName(name)[0].childNodes[0].nodeValue;
+    } else {
+        return "";
+    }
 }

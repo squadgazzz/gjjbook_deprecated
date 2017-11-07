@@ -7,7 +7,7 @@
         </Property>
         <Property name="log-path">logs</Property>
         <Property name="log-name">node-${hostName}</Property>
-        <Property name="archive">${log-path}/archive</Property>
+        <Property name="archive">${log-path}/archive</Property> <todo>путь через -d ключ до логов</todo>
         <Property name="show_sql">true</Property>
         <Property name="format_sql">true</Property>
         <Property name="use_sql_comments">true</Property>

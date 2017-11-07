@@ -7,15 +7,11 @@ import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.List;
 
-@Service // TODO: 25.10.2017 не работает на интерфейсе
-@Transactional
-// TODO: 25.10.2017 если не ставить аннотацию у всего класса, то не работает. в интерфейсе тоже не работает
+@Service
 public class AccountService implements Serviceable<Account, Integer> {
     private AccountDao accountDao;
     private PhoneDao phoneDao;
@@ -30,6 +26,7 @@ public class AccountService implements Serviceable<Account, Integer> {
     }
 
     @Override
+    @Transactional
     public Account update(Account account) throws DaoException {
         if (account == null) {
             return null;
@@ -39,6 +36,7 @@ public class AccountService implements Serviceable<Account, Integer> {
     }
 
     @Override
+    @Transactional
     public void delete(Account account) {
         if (account == null) {
             return;
@@ -48,7 +46,7 @@ public class AccountService implements Serviceable<Account, Integer> {
     }
 
     @Override
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+//    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Account getByPk(Integer id) {
         if (id == null) {
             return null;
@@ -62,7 +60,7 @@ public class AccountService implements Serviceable<Account, Integer> {
         return accountDao.getAll();
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Account getByEmail(String email) {
         if (email == null) {
             return null;
@@ -71,17 +69,25 @@ public class AccountService implements Serviceable<Account, Integer> {
         return accountDao.getByEmail(email);
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public boolean isPasswordMatch(String email, String password, boolean isEncrypted) {
         return !(email == null || password == null) && accountDao.isPasswordMatch(email, password, isEncrypted);
     }
 
-    public String convertByteAvatarToString(byte[] byteArrayAvatar) {
-        if (byteArrayAvatar == null) {
+    public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
+        if (query == null) {
             return null;
         }
 
-        return Base64.getEncoder().encodeToString(byteArrayAvatar);
+        return accountDao.findByPartName(query, currentPage, pageSize);
+    }
+
+    public long getSearchResultCount(String query) {
+        if (query == null) {
+            return 0;
+        }
+
+        return accountDao.getSearchResultCount(query);
     }
 
     @Override
@@ -124,21 +130,5 @@ public class AccountService implements Serviceable<Account, Integer> {
 
     public void setPhoneDao(PhoneDao phoneDao) {
         this.phoneDao = phoneDao;
-    }
-
-    public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
-        if (query == null) {
-            return null;
-        }
-
-        return accountDao.findByPartName(query, currentPage, pageSize);
-    }
-
-    public long getSearchResultCount(String query) {
-        if (query == null) {
-            return 0;
-        }
-
-        return accountDao.getSearchResultCount(query);
     }
 }

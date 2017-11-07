@@ -13,10 +13,10 @@ public interface Serviceable<T extends Identified<PK>, PK extends Integer> {
 
     void delete(T object) throws ServiceException;
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+//    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     T getByPk(PK id) throws ServiceException;
 
-    @Transactional(propagation=Propagation.NOT_SUPPORTED)
+//    @Transactional(propagation=Propagation.NOT_SUPPORTED)
     List<T> getAll() throws ServiceException;
 
 }

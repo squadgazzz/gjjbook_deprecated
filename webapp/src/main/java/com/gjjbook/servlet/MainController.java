@@ -3,13 +3,13 @@ package com.gjjbook.servlet;
 import com.gjjbook.dao.DaoException;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
-import com.gjjbook.domain.Gender;
 import com.gjjbook.domain.Phone;
-import com.gjjbook.domain.PhoneType;
 import com.gjjbook.service.AccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -19,13 +19,12 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Properties;
 
 @Controller
 @SessionAttributes("loggedUser")
@@ -36,6 +35,12 @@ public class MainController {
 
     @Autowired
     private AccountService service;
+
+    @Value("${PAGE_SIZE}")
+    private int pageSize;
+
+    @Value("${AUTOCOMPLETE_SIZE}")
+    private int autocompleteSize;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ModelAndView login() {
@@ -83,7 +88,7 @@ public class MainController {
             } else {
                 modelAndView = new ModelAndView("/login");
                 modelAndView.addObject("errMsg", "Email/password does not match");
-
+// TODO: 04.11.2017 добавить логгирование в дао, эксепшены, сервис слой и тп
                 logger.info("Someone tried to login with no luck"); // TODO: 30.10.2017 add IP
             }
 
@@ -108,7 +113,7 @@ public class MainController {
                 return null;
             } else {
                 modelAndView.addObject("account", account);
-                modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
+//                modelAndView.addObject("avatar", service.convertByteAvatarToString(account.getAvatar()));
             }
 
             return modelAndView;
@@ -141,9 +146,6 @@ public class MainController {
 
     @InitBinder("account")
     public void customAccountModel(WebDataBinder binder) {
-//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//        sdf.setLenient(true);
-//        binder.registerCustomEditor(Date.class, new CustomDateEditor(sdf, true));
         binder.registerCustomEditor(LocalDate.class, "birthDate", new PropertyEditorSupport() {
             @Override
             public String getAsText() {
@@ -156,37 +158,13 @@ public class MainController {
                 setValue(LocalDate.parse(text));
             }
         });
-        binder.registerCustomEditor(PhoneType.class, "type", new PropertyEditorSupport() {
-            @Override
-            public String getAsText() {
-                PhoneType phoneType = (PhoneType) getValue();
-                return phoneType.name();
-            }
-
-            @Override
-            public void setAsText(String text) throws IllegalArgumentException {
-                setValue(PhoneType.valueOf(text));
-            }
-        });
-        binder.registerCustomEditor(Gender.class, "sex", new PropertyEditorSupport() {
-            @Override
-            public String getAsText() {
-                Gender gender = (Gender) getValue();
-                return gender.name();
-            }
-
-            @Override
-            public void setAsText(String text) throws IllegalArgumentException {
-                setValue(Gender.valueOf(text));
-            }
-        });
         binder.registerCustomEditor(byte[].class, "avatar", new ByteArrayMultipartFileEditor());
     }
 
     @RequestMapping(value = "/updateaccount", method = RequestMethod.POST)
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
-                                      HttpServletResponse resp) throws IOException, DaoException {
+                                      HttpServletResponse resp, HttpServletRequest req) throws IOException, DaoException {
         if (!account.getId().equals(loggedUser.getId())) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
@@ -195,13 +173,17 @@ public class MainController {
                 account.setAvatar(loggedUser.getAvatar());
             }
 
+            System.out.println(account.getHomeAddress() + "!!!!!!!!!!!!!!!");
+
             for (Phone p : account.getPhones()) {
                 p.setOwner(account);
             }
 
-            service.update(account);
+            Account updatedAccount = service.update(account);
+            ModelAndView modelAndView = new ModelAndView("redirect:/account?id=" + account.getId());
+            modelAndView.addObject("loggedUser", updatedAccount);
 
-            return new ModelAndView("redirect:/account?id=" + account.getId());
+            return modelAndView;
         }
     }
 
@@ -224,23 +206,17 @@ public class MainController {
     @RequestMapping(value = "/search")
     public ModelAndView search(@RequestParam("q") String query) throws ServletException {
         ModelAndView modelAndView = new ModelAndView("searchResults");
-        try (InputStreamReader is = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("search.properties"))) {
-            Properties properties = new Properties();
-            properties.load(is);
-            int pageSize = Integer.parseInt(properties.getProperty("PAGE_SIZE"));
-            long searchResultCount = service.getSearchResultCount(query);
+        // done: 04.11.2017 чтобы спринг читал файл и инжектил, аннотация @Value, 2 проперти - размер автокомплита и страницы поиска
+        long searchResultCount = service.getSearchResultCount(query);
 
-            System.out.println(searchResultCount);
+        System.out.println(searchResultCount);
 
-            List<AccountDTO> accounts = service.findByPartName(query, 1, pageSize);
+        List<AccountDTO> accounts = service.findByPartName(query, 1, pageSize);
 
-            modelAndView.addObject("accounts", accounts);
-            modelAndView.addObject("searchResultCount", searchResultCount);
-            modelAndView.addObject("pageSize", pageSize);
-            modelAndView.addObject("query", query);
-        } catch (IOException e) {
-            throw new ServletException(e);
-        }
+        modelAndView.addObject("accounts", accounts);
+        modelAndView.addObject("searchResultCount", searchResultCount);
+        modelAndView.addObject("pageSize", pageSize);
+        modelAndView.addObject("query", query);
 
         return modelAndView;
     }
@@ -249,15 +225,15 @@ public class MainController {
     @ResponseBody
     public List<AccountDTO> quickSearch(@RequestParam("q") String query,
                                         @RequestParam(value = "currentPage", required = false) Integer currentPage,
-                                        @RequestParam(value = "pageSize", required = false) Integer pageSize) {
+                                        @RequestParam(value = "pageSize", required = false) Integer newPageSize) {
+        if (newPageSize == null) {
+            newPageSize = autocompleteSize;
+        }
+
         if (currentPage == null) {
-            currentPage = 0;
+            currentPage = 1;
         }
 
-        if (pageSize == null) {
-            pageSize = 10;
-        }
-
-        return service.findByPartName(query, currentPage, pageSize);
+        return service.findByPartName(query, currentPage, newPageSize);
     }
 }

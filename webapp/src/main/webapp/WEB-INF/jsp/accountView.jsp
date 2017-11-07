@@ -45,7 +45,7 @@
                         <div class="col-xs-12 col-left" align="center">
                             <div class="well">
                                 <img width="100%" alt="Avatar"
-                                     src="data:image/jpeg;base64,${avatar}"/><br/><br/>
+                                     src="data:image/jpeg;base64,${account.stringAvatar}"/><br/><br/>
                                 <c:if test="${sessionScope.loggedUser.id == account.id}">
                                     <a class="btn btn-block"
                                        href="editaccount?id=${account.id}">Edit profile

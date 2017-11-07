@@ -16,6 +16,11 @@
         <property name="suffix" value=".jsp"/>
     </bean>
 
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="location" value="classpath:search.properties"/>
+    </bean>
+
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
     <mvc:annotation-driven/>

@@ -12,7 +12,6 @@ public abstract class AbstractDao<T extends Identified<PK>, PK> implements Gener
 
     @Override
     public T update(T object) throws DaoException {
-        System.out.println("i'm here for some reason");
         if (object == null) {
             return null;
         }

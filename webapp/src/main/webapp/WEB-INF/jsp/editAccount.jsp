@@ -142,7 +142,7 @@
 
                                         <div class="col-sm-6">
                                                 <%--<input type="hidden" name="phones[${loop.index}].id" value="${phone.id}">--%>
-                                                <%--<input type="hidden" path="phones[${loop.index}].owner" value="${account}">--%>
+                                                <%--<input type="hidden" name="phones[${loop.index}].owner" value="${account}">--%>
                                             <input class="form-control" type="text" name="phones[${loop.index}].number"
                                                    value="${phone.number}" required="required" data-minlength="18"
                                                    data-maxlength="18" data-pattern-error="Only digits. Length 10.">

@@ -13,6 +13,7 @@ import javax.persistence.criteria.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             if (avatar == null) {
                 account.setAvatar(getDefaultAvatar(account.getGender()));
             }
-            List<Phone> phones = account.getPhones();
+            List<Phone> phones = account.getPhones(); // TODO: 04.11.2017 проверить равенство по ссылке у аккаунта и собственника телефона upd. привязать аккаунт не удалось
             account.setPhones(null);
             account = entityManager.merge(account);
             entityManager.flush();
@@ -57,17 +58,21 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             return null;
         }
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
-        Root<Account> from = criteriaQuery.from(Account.class);
-        CriteriaQuery<Account> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("id"), key));
-        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
+        return entityManager.find(Account.class, key);
 
-        try {
-            return typedQuery.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
+//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
+//        Root<Account> from = criteriaQuery.from(Account.class);
+//        CriteriaQuery<Account> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("id"), key));
+//        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
+//
+//        // done: 04.11.2017 переделать на метод find
+//
+//        try {
+//            return typedQuery.getSingleResult();
+//        } catch (NoResultException e) {
+//            return null;
+//        }
     }
 
     @Override
@@ -77,7 +82,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         Root<Account> from = criteriaQuery.from(Account.class);
         CriteriaQuery<Account> select = criteriaQuery.select(from);
         TypedQuery<Account> typedQuery = entityManager.createQuery(select);
-
+// done: 04.11.2017 findAll нет такого метода
         try {
             return typedQuery.getResultList();
         } catch (NoResultException e) {
@@ -150,16 +155,19 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         return image;
     }
 
+    // TODO: 04.11.2017 добавить друзей
+
     public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
-        List<Object[]> queryList = permute(query.split(" "));
-//        String sql = "SELECT * FROM accounts WHERE \n" +
-//                "REPLACE(CONCAT_WS('', name, middleName, surName), ' ', '') LIKE ? OR\n" + ....
+//        List<Object[]> queryList = permute(query.split(" "));
+        String[] queryWords = query.split(" ");
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
+        // done: 04.11.2017 искать по имени или фамилии отдельно
+
         CriteriaQuery<AccountDTO> criteriaQuery = cb.createQuery(AccountDTO.class);
         Root<AccountDTO> from = criteriaQuery.from(AccountDTO.class);
-        Predicate whereClause = getWhereClause(queryList, cb, from);
+        Predicate whereClause = getWhereClause(queryWords, cb, from);
 
         CriteriaQuery<AccountDTO> select = criteriaQuery.select(from).where(whereClause);
         TypedQuery<AccountDTO> typedQuery = entityManager.createQuery(select);
@@ -168,81 +176,42 @@ public class AccountDao extends AbstractDao<Account, Integer> {
     }
 
     public long getSearchResultCount(String query) {
-        List<Object[]> queryList = permute(query.split(" "));
+//        List<Object[]> queryList = permute(query.split(" "));
+        String[] queryWords = query.split(" ");
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<AccountDTO> from = countQuery.from(AccountDTO.class);
-        Predicate whereClause = getWhereClause(queryList, cb, from);
+        Predicate whereClause = getWhereClause(queryWords, cb, from);
 
         CriteriaQuery<Long> select = countQuery.select(cb.count(from)).where(whereClause);
 
         return entityManager.createQuery(select).getSingleResult();
     }
 
-    private Predicate getWhereClause(List<Object[]> queryList, CriteriaBuilder cb, Root<AccountDTO> from) {
-        Expression<String> fullName = cb.concat(from.get("name"), "");
-        fullName = cb.concat(fullName, from.get("middleName"));
-        fullName = cb.concat(fullName, from.get("surName"));
-        fullName = cb.function("REPLACE", String.class, fullName, cb.literal(" "), cb.literal(""));
+    private Predicate getWhereClause(String[] queryWords, CriteriaBuilder cb, Root<AccountDTO> from) {
+        List<Expression<String>> fullName = new ArrayList<>();
+        fullName.add(from.get("name"));
+        fullName.add(from.get("middleName"));
+        fullName.add(from.get("surName"));
 
         Predicate whereClause = null;
-        for (Object[] q : queryList) {
+        for (String word : queryWords) {
+            Predicate orClause = null;
+            for (Expression<String> e : fullName) {
+                if (orClause == null) {
+                    orClause = cb.or(cb.like(e, "%" + word + "%"));
+                } else {
+                    orClause = cb.or(orClause, cb.like(e, "%" + word + "%"));
+                }
+            }
+
             if (whereClause == null) {
-                whereClause = cb.or(cb.like(fullName, "%" + String.join("",
-                        Arrays.copyOf(q, q.length, String[].class)) + "%"));
+                whereClause = cb.and(orClause);
             } else {
-                whereClause = cb.or(whereClause, cb.like(fullName, "%" + String.join("",
-                        Arrays.copyOf(q, q.length, String[].class)) + "%"));
+                whereClause = cb.and(whereClause, orClause);
             }
         }
 
         return whereClause;
-    }
-
-//    private Expression<String> concatExpressions(CriteriaBuilder cb, String delimiter, Expression<String>... expressions) {
-//        Expression<String> result = null;
-//        for (int i = 0; i < expressions.length; i++) {
-//            final boolean first = i == 0, last = i == (expressions.length - 1);
-//            final Expression<String> expression = expressions[i];
-//            if (first && last) {
-//                result = expression;
-//            } else if (first) {
-//                result = cb.concat(expression, delimiter);
-//            } else {
-//                result = cb.concat(result, expression);
-//                if (!last) {
-//                    result = cb.concat(result, delimiter);
-//                }
-//            }
-//        }
-//        return result;
-//    }
-
-    private List<Object[]> permute(String[] input) {
-        List<Object[]> result = new LinkedList<>();
-        permute(input, 0, result);
-
-        return result;
-    }
-
-    private void permute(String[] input, int k, List<Object[]> result) {
-        if (k == input.length) {
-            List<String> temp = new LinkedList<>();
-
-            temp.addAll(Arrays.asList(input));
-            result.add(temp.toArray());
-        } else {
-            for (int i = k; i < input.length; i++) {
-                String temp = input[k];
-                input[k] = input[i];
-                input[i] = temp;
-
-                permute(input, k + 1, result);
-
-                temp = input[k];
-                input[k] = input[i];
-                input[i] = temp;
-            }
-        }
     }
 }
