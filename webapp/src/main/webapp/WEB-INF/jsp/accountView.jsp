@@ -11,6 +11,8 @@
 <head>
     <jsp:include page="/WEB-INF/jsp/header.jsp"/>
     <link rel="stylesheet" href="<c:url value="/css/body.css" />">
+
+    <script src="<c:url value="/js/friendButton.js" />"></script>
 </head>
 <body>
 <c:choose>
@@ -34,6 +36,12 @@
                                 Messages</a>
                         </li>
                         <li>
+                            <a class="list-group-item" href="<c:url value="/friends?id=${loggedUser.id}"/>">
+                                <span class="glyphicon glyphicon-user" style="margin-right: 10px"></span>
+                                My friends
+                            </a>
+                        </li>
+                        <li>
                             <a class="list-group-item" href="#"><span
                                     class="glyphicon glyphicon-th-large" style="margin-right: 10px"></span>
                                 Groups</a>
@@ -46,11 +54,8 @@
                             <div class="well">
                                 <img width="100%" alt="Avatar"
                                      src="data:image/jpeg;base64,${account.stringAvatar}"/><br/><br/>
-                                <c:if test="${sessionScope.loggedUser.id == account.id}">
-                                    <a class="btn btn-block"
-                                       href="editaccount?id=${account.id}">Edit profile
-                                    </a>
-                                </c:if>
+                                <a name="friend-button" class="btn btn-block" href="#"></a>
+                                <a name="friend-button" class="btn btn-block" href="#" style="display: none"></a>
                             </div>
                         </div>
                     </div>
@@ -83,6 +88,8 @@
                     <div class="row">
                         <div class="col-xs-12 col-right">
                             <div class="well">
+                                <input type="hidden" name="loggedId" value="${loggedUser.id}"/>
+                                <input type="hidden" name="id" value="${account.id}"/>
                                 <h3>
                                         ${account.name} ${account.middleName} ${account.surName}
                                 </h3>

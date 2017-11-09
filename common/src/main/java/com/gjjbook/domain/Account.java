@@ -1,5 +1,7 @@
 package com.gjjbook.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ public class Account implements Identified<Integer> {
     @Enumerated(EnumType.STRING)
     private Gender gender;
     private LocalDate birthDate;
+    @JsonBackReference
     @OneToMany
             (
                     mappedBy = "owner",

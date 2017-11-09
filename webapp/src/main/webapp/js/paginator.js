@@ -44,8 +44,6 @@ $(document).ready(function () {
                             document.getElementsByName("accountName")[i].setAttribute("href", accountUrl);
                             document.getElementsByName("accountName")[i].childNodes[0].textContent = accountName;
                         });
-
-
                     }
                 })
             }

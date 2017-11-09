@@ -14,8 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 //@Component
@@ -58,21 +56,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             return null;
         }
 
-        return entityManager.find(Account.class, key);
-
-//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-//        CriteriaQuery<Account> criteriaQuery = criteriaBuilder.createQuery(Account.class);
-//        Root<Account> from = criteriaQuery.from(Account.class);
-//        CriteriaQuery<Account> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("id"), key));
-//        TypedQuery<Account> typedQuery = entityManager.createQuery(select);
-//
-//        // done: 04.11.2017 переделать на метод find
-//
-//        try {
-//            return typedQuery.getSingleResult();
-//        } catch (NoResultException e) {
-//            return null;
-//        }
+        return entityManager.find(Account.class, key);  // done: 04.11.2017 переделать на метод find
     }
 
     @Override
@@ -153,18 +137,12 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             image = bos.toByteArray();
         }
         return image;
-    }
-
-    // TODO: 04.11.2017 добавить друзей
+    }    // done: 04.11.2017 добавить друзей
 
     public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
-//        List<Object[]> queryList = permute(query.split(" "));
         String[] queryWords = query.split(" ");
-
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
         // done: 04.11.2017 искать по имени или фамилии отдельно
-
         CriteriaQuery<AccountDTO> criteriaQuery = cb.createQuery(AccountDTO.class);
         Root<AccountDTO> from = criteriaQuery.from(AccountDTO.class);
         Predicate whereClause = getWhereClause(queryWords, cb, from);
@@ -176,7 +154,6 @@ public class AccountDao extends AbstractDao<Account, Integer> {
     }
 
     public long getSearchResultCount(String query) {
-//        List<Object[]> queryList = permute(query.split(" "));
         String[] queryWords = query.split(" ");
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);

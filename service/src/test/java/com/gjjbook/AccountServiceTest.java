@@ -2,6 +2,7 @@ package com.gjjbook;
 
 import com.gjjbook.dao.AccountDao;
 import com.gjjbook.dao.DaoException;
+import com.gjjbook.dao.FriendDao;
 import com.gjjbook.dao.PhoneDao;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Phone;
@@ -35,12 +36,15 @@ public class AccountServiceTest {
     @Mock
     private PhoneDao phoneDao;
 
+    @Mock
+    private FriendDao friendDao;
+
     @InjectMocks
     private AccountService accountService;
 
     @Before
     public void setUp() throws Exception, ServiceException, DaoException {
-        accountService = new AccountService(accountDao, phoneDao);
+        accountService = new AccountService(accountDao, phoneDao, friendDao);
         when(accountDao.update(new Account())).thenReturn(account);
     }
 
@@ -95,38 +99,4 @@ public class AccountServiceTest {
 
         verify(accountDao).getAll();
     }
-
-//    @Test
-//    public void addFriend() throws Exception, DaoException, ServiceException {
-//        Account friend = mock(Account.class);
-//        List<Account> friends = new ArrayList<>();
-//        friends.add(friend);
-//        List<Account> friendFriends = new ArrayList<>();
-//        friendFriends.add(account);
-//        accountService.addFriend(account, friend);
-//
-//        verify(accountDao).update(account);
-//        verify(account).setFriendList(friends);
-//        verify(accountDao).update(friend);
-//        verify(friend).setFriendList(friendFriends);
-//    }
-
-//    @Test
-//    public void removeFriend() throws Exception, DaoException, ServiceException {
-//        Account friendOne = new Account();
-//        friendOne.setEmail("1");
-//        Account friendTwo = new Account();
-//        friendTwo.setEmail("2");
-//        List<Account> oneFriends = new ArrayList<>();
-//        List<Account> twoFriends = new ArrayList<>();
-//        oneFriends.add(friendTwo);
-//        twoFriends.add(friendOne);
-//        friendOne.setFriendList(oneFriends);
-//        friendTwo.setFriendList(twoFriends);
-//
-//        accountService.removeFriend(friendOne, friendTwo);
-//
-//        verify(accountDao).update(friendOne);
-//        verify(accountDao).update(friendTwo);
-//    }
 }

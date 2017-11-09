@@ -2,9 +2,12 @@ package com.gjjbook.service;
 
 import com.gjjbook.dao.AccountDao;
 import com.gjjbook.dao.DaoException;
+import com.gjjbook.dao.FriendDao;
 import com.gjjbook.dao.PhoneDao;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.DTO.AccountDTO;
+import com.gjjbook.domain.Friend;
+import com.gjjbook.domain.FriendPk;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +18,49 @@ import java.util.List;
 public class AccountService implements Serviceable<Account, Integer> {
     private AccountDao accountDao;
     private PhoneDao phoneDao;
+    private FriendDao friendDao;
 
     public AccountService() {
     }
 
     @Autowired
-    public AccountService(AccountDao accountDao, PhoneDao phoneDao) {
+    public AccountService(AccountDao accountDao, PhoneDao phoneDao, FriendDao friendDao) {
         this.accountDao = accountDao;
         this.phoneDao = phoneDao;
+        this.friendDao = friendDao;
+    }
+
+    @Transactional
+    public void requestFriend(Account first, Account second) throws DaoException {
+        friendDao.requestFriend(first, second);
+    }
+
+    @Transactional
+    public void acceptFriend(Account first, Account second) throws DaoException {
+        friendDao.acceptFriend(first, second);
+    }
+
+    @Transactional
+    public void removeFriend(Account first, Account second) throws DaoException {
+        friendDao.removeFriend(first, second);
+    }
+
+    @Transactional
+    public void declineFriend(Account first, Account second) throws DaoException {
+        friendDao.declineFriend(first, second);
+    }
+
+    public Friend getFriendByPk(Account accountOne, Account accountTwo) throws DaoException {
+        return friendDao.getByPK(new FriendPk(accountOne, accountTwo));
+    }
+
+    public Integer getFriendStatus(Integer first, Integer second) {
+        return friendDao.getStatus(first, second);
+    }
+
+
+    public Integer getFriendStatus(Account first, Account second) {
+        return friendDao.getStatus(first, second);
     }
 
     @Override
@@ -46,7 +84,6 @@ public class AccountService implements Serviceable<Account, Integer> {
     }
 
     @Override
-//    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Account getByPk(Integer id) {
         if (id == null) {
             return null;
@@ -60,7 +97,6 @@ public class AccountService implements Serviceable<Account, Integer> {
         return accountDao.getAll();
     }
 
-    //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Account getByEmail(String email) {
         if (email == null) {
             return null;
@@ -69,7 +105,6 @@ public class AccountService implements Serviceable<Account, Integer> {
         return accountDao.getByEmail(email);
     }
 
-    //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public boolean isPasswordMatch(String email, String password, boolean isEncrypted) {
         return !(email == null || password == null) && accountDao.isPasswordMatch(email, password, isEncrypted);
     }
@@ -103,17 +138,10 @@ public class AccountService implements Serviceable<Account, Integer> {
 
     @Override
     public int hashCode() {
-        int result = accountDao != null ? accountDao.hashCode() : 0;
-        result = 31 * result + (phoneDao != null ? phoneDao.hashCode() : 0);
+        int result = accountDao.hashCode();
+        result = 31 * result + phoneDao.hashCode();
+        result = 31 * result + friendDao.hashCode();
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "AccountService{" +
-                "accountDao=" + accountDao +
-                ", phoneDao=" + phoneDao +
-                '}';
     }
 
     public AccountDao getAccountDao() {
@@ -130,5 +158,17 @@ public class AccountService implements Serviceable<Account, Integer> {
 
     public void setPhoneDao(PhoneDao phoneDao) {
         this.phoneDao = phoneDao;
+    }
+
+    public FriendDao getFriendDao() {
+        return friendDao;
+    }
+
+    public void setFriendDao(FriendDao friendDao) {
+        this.friendDao = friendDao;
+    }
+
+    public List<Account> findAccountFriends(Account accountOne) {
+        return friendDao.getAccountFriends(accountOne);
     }
 }

@@ -23,18 +23,6 @@ public class PhoneDao extends AbstractDao<Phone, Integer> {
         }
 
         return entityManager.find(Phone.class, key);
-
-//        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-//        CriteriaQuery<Phone> criteriaQuery = criteriaBuilder.createQuery(Phone.class);
-//        Root<Phone> from = criteriaQuery.from(Phone.class);
-//        CriteriaQuery<Phone> select = criteriaQuery.select(from).where(criteriaBuilder.equal(from.get("id"), key));
-//        TypedQuery<Phone> typedQuery = entityManager.createQuery(select);
-//
-//        try {
-//            return typedQuery.getSingleResult();
-//        } catch (NoResultException e) {
-//            return null;
-//        }
     }
 
     @Override
