@@ -6,9 +6,6 @@ import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Friend;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
-
-import java.util.List;
 
 @Controller
 @SessionAttributes("loggedUser")

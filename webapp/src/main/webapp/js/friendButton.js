@@ -19,7 +19,7 @@ $(document).ready(function () {
                     var actionId = data.actionAccount.id;
                     loggedId = Number(loggedId);
                     switch (status) {
-                        case 0:
+                        case 'PENDING':
                             if (actionId === loggedId) {
                                 friendButtonOne.textContent = "Cancel request";
                             } else {
@@ -31,10 +31,10 @@ $(document).ready(function () {
                                 // friendButton.parentElement.appendChild(clone);
                             }
                             break;
-                        case 1:
+                        case 'ACCEPTED':
                             friendButtonOne.textContent = "Remove friend";
                             break;
-                        case 2:
+                        case 'DECLINED':
                             if (actionId === loggedId) {
                                 friendButtonOne.textContent = "Cancel request";
                             } else {
@@ -42,7 +42,7 @@ $(document).ready(function () {
                             }
                             friendButtonOne.textContent = "Declined";
                             break;
-                        case 3:
+                        case 'BLOCKED':
                             friendButtonOne.textContent = "Blocked";
                             break;
                         default:
@@ -151,7 +151,7 @@ function addFriend(friendButton, contextPath, friendId) {
         },
         success: function () {
             friendButton.textContent = "Cancel request";
-            document.getElementsByName("friend-button")[0].textContent = "Add friend"
+            // document.getElementsByName("friend-button")[0].textContent = "Add friend"
         },
         error: function () {
             alert("fail3");

@@ -3,6 +3,7 @@ package com.gjjbook.dao;
 import com.gjjbook.domain.Account;
 import com.gjjbook.domain.Friend;
 import com.gjjbook.domain.FriendPk;
+import com.gjjbook.domain.FriendShipStatus;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.NoResultException;
@@ -24,22 +25,22 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
     }
 
     public void requestFriend(Account first, Account second) throws DaoException {
-        update(properFriend(first, second, 0));
+        update(properFriend(first, second, FriendShipStatus.PENDING));
     }
 
     public void acceptFriend(Account first, Account second) throws DaoException {
-        update(properFriend(first, second, 1));
+        update(properFriend(first, second, FriendShipStatus.ACCEPTED));
     }
 
     public void declineFriend(Account first, Account second) throws DaoException {
-        update(properFriend(first, second, 2));
+        update(properFriend(first, second, FriendShipStatus.DECLINED));
     }
 
     public void removeFriend(Account first, Account second) throws DaoException {
         delete(getByPK(new FriendPk(first, second)));
     }
 
-    private Friend properFriend(Account first, Account second, int status) {
+    private Friend properFriend(Account first, Account second, FriendShipStatus status) {
         Friend friend;
         if (first.getId() < second.getId()) {
             friend = new Friend(first, second, status, first);
@@ -50,11 +51,11 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
         return friend;
     }
 
-    public Integer getStatus(Account first, Account second) {
+    public String getStatus(Account first, Account second) {
         return getStatus(first.getId(), second.getId());
     }
 
-    public Integer getStatus(Integer first, Integer second) {
+    public String getStatus(Integer first, Integer second) {
         if (first > second) {
             Integer temp = first;
             first = second;
@@ -62,18 +63,18 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
         }
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Integer> statusQuery = cb.createQuery(Integer.class);
+        CriteriaQuery<String> statusQuery = cb.createQuery(String.class);
         Root<Friend> from = statusQuery.from(Friend.class);
 
         Predicate whereClause = cb.and(cb.equal(from.get("accountOne").get("id"), first));
         whereClause = cb.and(whereClause, cb.equal(from.get("accountTwo").get("id"), second));
 
-        CriteriaQuery<Integer> select = statusQuery.select(from.get("status")).where(whereClause);
+        CriteriaQuery<String> select = statusQuery.select(from.get("status")).where(whereClause);
 
         try {
             return entityManager.createQuery(select).getSingleResult();
         } catch (NoResultException e) {
-            return -1;
+            return null;
         }
     }
 
@@ -97,7 +98,7 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
         }
     }
 
-    public List<Account> getAccountFriends(Account account) {
+    public List<Account> getAccountFriends(Account account, int currentPage, int pageSize) {
         Integer id = account.getId();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Friend> statusQuery = cb.createQuery(Friend.class);
@@ -105,15 +106,24 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
 
         Predicate whereClause = cb.or(cb.equal(from.get("accountOne").get("id"), id));
         whereClause = cb.or(whereClause, cb.equal(from.get("accountTwo").get("id"), id));
-        whereClause = cb.and(whereClause, cb.equal(from.get("status"), 1));
+        whereClause = cb.and(whereClause, cb.equal(from.get("status"), FriendShipStatus.ACCEPTED));
 
         CriteriaQuery<Friend> select = statusQuery.select(from).where(whereClause);
-        List<Friend> friends = entityManager.createQuery(select).getResultList();
+        TypedQuery<Friend> typedQuery = entityManager.createQuery(select);
+        List<Friend> friends = typedQuery.setFirstResult(currentPage * pageSize - pageSize).setMaxResults(pageSize).getResultList();
 
         return getAccountsFromFriends(id, friends);
     }
 
-    public List<Account> getAccountOutRequests(Account account) {
+    public List<Account> getAccountOutRequests(Account account, int currentPage, int pageSize) {
+        return getAccountFriendRequests(account, currentPage, pageSize, RequestType.OUT);
+    }
+
+    public List<Account> getAccountInRequests(Account account, int currentPage, int pageSize) {
+        return getAccountFriendRequests(account, currentPage, pageSize, RequestType.IN);
+    }
+
+    private List<Account> getAccountFriendRequests(Account account, int currentPage, int pageSize, RequestType requestType) {
         Integer id = account.getId();
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Friend> statusQuery = cb.createQuery(Friend.class);
@@ -121,30 +131,37 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
 
         Predicate whereClause = cb.or(cb.equal(from.get("accountOne").get("id"), id));
         whereClause = cb.or(whereClause, cb.equal(from.get("accountTwo").get("id"), id));
-        whereClause = cb.and(whereClause, cb.equal(from.get("status"), 0));
-        whereClause = cb.and(whereClause, cb.equal(from.get("actionAccount").get("id"), id));
+        whereClause = cb.and(whereClause, cb.equal(from.get("status"), FriendShipStatus.PENDING));
+
+        Predicate firstSecondPredicate;
+        if (requestType == RequestType.IN) {
+            firstSecondPredicate = cb.notEqual(from.get("actionAccount").get("id"), id);
+        } else {
+            firstSecondPredicate = cb.equal(from.get("actionAccount").get("id"), id);
+        }
+
+        whereClause = cb.and(whereClause, firstSecondPredicate);
 
         CriteriaQuery<Friend> select = statusQuery.select(from).where(whereClause);
-        List<Friend> friends = entityManager.createQuery(select).getResultList();
+        TypedQuery<Friend> typedQuery = entityManager.createQuery(select);
+        List<Friend> friends = typedQuery.setFirstResult(currentPage * pageSize - pageSize).setMaxResults(pageSize).getResultList();
 
         return getAccountsFromFriends(id, friends);
     }
 
-    public List<Account> getAccountInRequests(Account account) {
-        Integer id = account.getId();
+    public long getRequestsCount(Account account, RequestType requestType) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Friend> statusQuery = cb.createQuery(Friend.class);
-        Root<Friend> from = statusQuery.from(Friend.class);
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Friend> from = countQuery.from(Friend.class);
+//        Predicate whereClause =
 
-        Predicate whereClause = cb.or(cb.equal(from.get("accountOne").get("id"), id));
-        whereClause = cb.or(whereClause, cb.equal(from.get("accountTwo").get("id"), id));
-        whereClause = cb.and(whereClause, cb.equal(from.get("status"), 0));
-        whereClause = cb.and(whereClause, cb.notEqual(from.get("actionAccount").get("id"), id));
+        return 0;
+    }
 
-        CriteriaQuery<Friend> select = statusQuery.select(from).where(whereClause);
-        List<Friend> friends = entityManager.createQuery(select).getResultList();
-
-        return getAccountsFromFriends(id, friends);
+    private enum RequestType {
+        CONFIRMED,
+        IN,
+        OUT
     }
 
     private List<Account> getAccountsFromFriends(Integer id, List<Friend> friends) {

@@ -40,71 +40,73 @@
             </ul>
         </div>
         <div class="col-xs-7">
-            <ul class="list-group">
-                <li>
-                    <div class="well">
-                        <label>Found accounts:</label>
+            <div class="well">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#global-accounts" data-toggle="tab">Accounts</a></li>
+                    <li><a href="#global-groups" data-toggle="tab">Groups</a></li>
+                </ul>
+                <div class="tab-content clearfix">
+                    <div class="tab-pane active" id="global-accounts">
+                        <div class="list-group">
+                            <c:forEach var="account" items="${accounts}">
+                                <c:if test="${not empty account}">
+                                    <a class="list-group-item" name="foundAccount"
+                                       href="<c:url value="/account?id=${account.id}"/>">
+                                        <div class="row">
+                                            <div class="col-xs-3">
+                                                <img name="accountAvatar" width="100px" alt="Avatar"
+                                                     src="data:image/jpeg;base64,${account.stringAvatar}"/>
+                                            </div>
+                                            <div class="col-xs-9">
+                                                <object name="accountName">
+                                                        ${account.name} ${account.middleName} ${account.surName}
+                                                </object>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </c:if>
+                            </c:forEach>
+                        </div>
                     </div>
-                </li>
-                <c:forEach var="account" items="${accounts}">
-                    <c:if test="${not empty account}">
-                        <li name="foundAccount">
-                            <div class="well">
-                                <div class="row">
-                                    <div class="col-xs-3">
-                                        <img name="accountAvatar" width="100px" alt="Avatar"
-                                             src="data:image/jpeg;base64,${account.stringAvatar}"/>
-                                    </div>
-                                    <div class="col-xs-9">
-                                        <a name="accountName" href="<c:url value="/account?id=${account.id}"/>">
-                                                ${account.name} ${account.middleName} ${account.surName}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </c:if>
-                </c:forEach>
-                <li name="paginator">
-                    <div class="well">
-                        <div id="compact-pagination" class="pagination"></div>
+                    <div class="tab-pane" id="global-groups">
+                        <h3>Development in progress</h3>
                     </div>
-                </li>
-            </ul>
-            <%--<label>Found accounts:</label>--%>
-            <%--<table class="table">--%>
-            <%--<c:forEach var="account" items="${accounts}">--%>
-            <%--<c:if test="${not empty account}">--%>
-            <%--<tr>--%>
-            <%--<td>--%>
-            <%--<img width="100px" alt="Avatar"--%>
-            <%--src="data:image/jpeg;base64,${encodedAvatars.get(account.id)}"/>--%>
-            <%--<a href="<c:url value="/account?id=${account.id}"/>">--%>
-            <%--${account.name} ${account.surName}--%>
-            <%--</a>--%>
-            <%--</td>--%>
-            <%--</tr>--%>
-            <%--</c:if>--%>
-            <%--</c:forEach>--%>
-            <%--</table>--%>
+                </div>
+                <object name="paginator">
+                    <div id="compact-pagination" class="pagination"></div>
+                </object>
+            </div>
         </div>
     </div>
     <div class="col-xs-3">
     </div>
 </div>
-<%--<table>
-    <tr>Found accounts:</tr>
-    <c:forEach var="account" items="${accounts}">
-        <c:if test="${not empty account}">
-            <tr>
-                <td>
-                    <a href="<c:url value="/account?id=${account.id}"/>">
-                            ${account.name} ${account.surName}
-                    </a>
-                </td>
-            </tr>
-        </c:if>
-    </c:forEach>
-</table>--%>
 </body>
 </html>
+
+
+<%--<ul class="list-group">--%>
+<%--<li>--%>
+<%--<div class="well">--%>
+<%--<label>Found accounts:</label>--%>
+<%--</div>--%>
+<%--</li>--%>
+<%--<c:forEach var="account" items="${accounts}">--%>
+<%--<c:if test="${not empty account}">--%>
+<%--<li name="foundAccount">--%>
+<%--<div class="well">--%>
+<%--<div class="row">--%>
+<%--<div class="col-xs-3">--%>
+<%--<img name="accountAvatar" width="100px" alt="Avatar"--%>
+<%--src="data:image/jpeg;base64,${account.stringAvatar}"/>--%>
+<%--</div>--%>
+<%--<div class="col-xs-9">--%>
+<%--<a name="accountName" href="<c:url value="/account?id=${account.id}"/>">--%>
+<%--${account.name} ${account.middleName} ${account.surName}--%>
+<%--</a>--%>
+<%--</div>--%>
+<%--</div>--%>
+<%--</div>--%>
+<%--</li>--%>
+<%--</c:if>--%>
+<%--</c:forEach>--%>

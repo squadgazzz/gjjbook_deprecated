@@ -15,6 +15,7 @@
 
     <script src="<c:url value="/plugins/simplePagination/jquery.simplePagination.js"/>"></script>
     <script src="<c:url value="/js/paginator.js"/>"></script>
+    <script src="<c:url value="/js/friendRequests.js"/>"></script>
 </head>
 <body>
 <input id="searchResultCount" type="hidden" value="${searchResultCount}"/>
@@ -46,37 +47,46 @@
             </ul>
         </div>
         <div class="col-xs-7">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#">My friends</a></li>
-                <li><a href="#">Outgoing requests</a></li>
-                <li><a href="#">Incoming requests</a></li>
-            </ul>
-            <ul class="list-group">
-                <c:forEach var="account" items="${accounts}">
-                    <c:if test="${not empty account}">
-                        <li name="foundAccount">
-                            <div class="well">
-                                <div class="row">
-                                    <div class="col-xs-3">
-                                        <img name="accountAvatar" width="100px" alt="Avatar"
-                                             src="data:image/jpeg;base64,${account.stringAvatar}"/>
-                                    </div>
-                                    <div class="col-xs-9">
-                                        <a name="accountName" href="<c:url value="/account?id=${account.id}"/>">
-                                                ${account.name} ${account.middleName} ${account.surName}
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </c:if>
-                </c:forEach>
-                <li name="paginator">
-                    <div class="well">
+            <div class="well">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#my-friends" data-toggle="tab">My friends</a></li>
+                    <li><a href="#outgoing-requests" data-toggle="tab" onclick="fillRequests('out')">Outgoing
+                        requests</a></li>
+                    <li><a href="#incoming-requests" data-toggle="tab" onclick="fillRequests('in')">Incoming
+                        requests</a></li>
+                </ul>
+                <div class="tab-content clearfix">
+                    <div class="tab-pane active" id="my-friends">
+                        <div class="list-group">
+                            <c:forEach var="account" items="${accounts}">
+                                <c:if test="${not empty account}">
+                                    <a href="<c:url value="/account?id=${account.id}"/>" class="list-group-item"
+                                       name="foundAccount">
+                                        <div class="row">
+                                            <div class="col-xs-3">
+                                                <img name="accountAvatar" width="100px" alt="Avatar"
+                                                     src="data:image/jpeg;base64,${account.stringAvatar}"/>
+                                            </div>
+                                            <div class="col-xs-9">
+                                                    ${account.name} ${account.middleName} ${account.surName}
+                                            </div>
+                                        </div>
+                                    </a>
+                                </c:if>
+                            </c:forEach>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="outgoing-requests">
+                        <h3>Work in progress</h3>
+                    </div>
+                    <div class="tab-pane" id="incoming-requests">
+                        <h3>Work in progress</h3>
+                    </div>
+                    <div name="paginator">
                         <div id="compact-pagination" class="pagination"></div>
                     </div>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
     </div>
     <div class="col-xs-3">

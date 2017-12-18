@@ -1,17 +1,34 @@
-$(document).ready(function () {
+var activeTabName = null;
+
+function tabClicker() {
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        activeTabName = e.target;
+        alert(activeTabName.innerHTML);
+    });
+}
+
+function paginateResults() {
     var contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2));
     var pageSize = $('#pageSize').val();
     var searchResultCount = $('#searchResultCount').val();
     var query = $('#query').val();
+    activeTabName = document.getElementsByClassName("nav nav-tabs")[0].getElementsByClassName("active")[0].textContent;
+
+    tabClicker();
 
     if (searchResultCount > pageSize) {
+        var url = contextPath;
+        switch (activeTabName) {
+            case "My friends":
+                url+='/'
+        }
         $('#compact-pagination').pagination({
             items: searchResultCount,
             itemsOnPage: pageSize,
             cssStyle: 'light-theme',
             onPageClick: function (pageNumber) {
                 $.ajax({
-                    url: contextPath + '/quickSearch',
+                    url: url,
                     method: 'POST',
                     data: {
                         q: query,
@@ -25,11 +42,11 @@ $(document).ready(function () {
 
                         if (foundAccountsCount < pageAccountsCount) {
                             for (var i = 0; i < pageAccountsCount - foundAccountsCount; i++) {
-                                $('li[name="foundAccount"]:last').remove();
+                                $('a[name="foundAccount"]:last').remove();
                             }
                         } else if (foundAccountsCount > pageAccountsCount) {
                             for (var k = 0; k < foundAccountsCount - pageAccountsCount; k++) {
-                                var lastAccount = $('li[name="foundAccount"]:last');
+                                var lastAccount = $('a[name="foundAccount"]:last');
                                 var clone = lastAccount.clone();
                                 lastAccount.after(clone);
                             }
@@ -41,7 +58,7 @@ $(document).ready(function () {
                             var accountName = account.name + " " + account.middleName + " " + account.surName;
 
                             document.getElementsByName("accountAvatar")[i].setAttribute("src", avatar);
-                            document.getElementsByName("accountName")[i].setAttribute("href", accountUrl);
+                            document.getElementsByName("foundAccount")[i].setAttribute("href", accountUrl);
                             document.getElementsByName("accountName")[i].childNodes[0].textContent = accountName;
                         });
                     }
@@ -49,8 +66,12 @@ $(document).ready(function () {
             }
         });
     } else {
-        $('li[name="paginator"]').hide();
+        $('object[name="paginator"]').hide();
     }
+}
+
+$(document).ready(function () {
+    paginateResults();
 });
 
 

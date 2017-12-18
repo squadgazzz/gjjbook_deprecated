@@ -13,6 +13,8 @@
         <Property name="use_sql_comments">true</Property>
     </Properties>
 
+    <todo>создать свой ключ до пути до логов</todo>
+
     <!--<ThresholdFilter level="trace"/>-->
 
     <Appenders>

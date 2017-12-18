@@ -25,9 +25,7 @@ public class SearchController extends AbstractController {
     @RequestMapping(value = "/search")
     public ModelAndView search(@RequestParam("q") String query) throws ServletException {
         ModelAndView modelAndView = new ModelAndView("searchResults");
-        // done: 04.11.2017 чтобы спринг читал файл и инжектил, аннотация @Value, 2 проперти - размер автокомплита и страницы поиска
         long searchResultCount = service.getSearchResultCount(query);
-
         List<AccountDTO> accounts = service.findByPartName(query, 1, pageSize);
 
         modelAndView.addObject("accounts", accounts);
@@ -60,14 +58,46 @@ public class SearchController extends AbstractController {
         ModelAndView modelAndView;
         List<Account> friends;
         if (idParam.equals(loggedUser.getId())) {
-            friends = service.findAccountFriends(loggedUser);
+            friends = service.findAccountFriends(loggedUser, 1, pageSize);
             modelAndView = new ModelAndView("showMyFriends");
         } else {
-            friends = service.findAccountFriends(service.getByPk(idParam));
+            friends = service.findAccountFriends(service.getByPk(idParam), 1, pageSize);
             modelAndView = new ModelAndView("showFriends");
         }
         modelAndView.addObject("accounts", friends);
 
         return modelAndView;
+    }
+
+    @RequestMapping(value = "/pendingFriends")
+    @ResponseBody
+    public List<Account> pendingFriends(@SessionAttribute("loggedUser") Account loggedUser,
+                                        @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                        @RequestParam(value = "pageSize", required = false) Integer newPageSize) {
+        if (newPageSize == null) {
+            newPageSize = autocompleteSize;
+        }
+
+        if (currentPage == null) {
+            currentPage = 1;
+        }
+
+        return service.getAccountInRequests(loggedUser, currentPage, newPageSize);
+    }
+
+    @RequestMapping(value = "/requestedFriends")
+    @ResponseBody
+    public List<Account> requestedFriends(@SessionAttribute("loggedUser") Account loggedUser,
+                                          @RequestParam(value = "currentPage", required = false) Integer currentPage,
+                                          @RequestParam(value = "pageSize", required = false) Integer newPageSize) {
+        if (newPageSize == null) {
+            newPageSize = autocompleteSize;
+        }
+
+        if (currentPage == null) {
+            currentPage = 1;
+        }
+
+        return service.getAccountOutRequests(loggedUser, currentPage, newPageSize);
     }
 }

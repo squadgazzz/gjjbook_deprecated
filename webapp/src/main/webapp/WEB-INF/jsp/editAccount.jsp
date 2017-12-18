@@ -121,7 +121,6 @@
                                     <div class="help-block with-errors"></div>
                                 </div>
                             </div>
-                            <%--<input type="hidden" id="Account_id" value="${account.id}">--%>
                             <c:forEach var="phone" items="${account.phones}" varStatus="loop">
                                 <c:if test="${not empty phone}">
                                     <div class="form-group phone has-feedback">
@@ -141,8 +140,6 @@
                                         </label>
 
                                         <div class="col-sm-6">
-                                                <%--<input type="hidden" name="phones[${loop.index}].id" value="${phone.id}">--%>
-                                                <%--<input type="hidden" name="phones[${loop.index}].owner" value="${account}">--%>
                                             <input class="form-control" type="text" name="phones[${loop.index}].number"
                                                    value="${phone.number}" required="required" data-minlength="18"
                                                    data-maxlength="18" data-pattern-error="Only digits. Length 10.">
@@ -245,8 +242,6 @@
                             <input type="button" onclick="importFromXml()" value="Import from XML"
                                    class="btn btn-block">
                             <input type="file" id="xmlInput" style="display: none"/>
-
-
                         </div>
                     </div>
                 </div>
@@ -255,7 +250,6 @@
     </div>
     <div id="confirm_modal" class="modal fade" role="dialog">
         <div class="modal-dialog modal-sm">
-            <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>

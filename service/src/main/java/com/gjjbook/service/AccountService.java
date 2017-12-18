@@ -54,12 +54,12 @@ public class AccountService implements Serviceable<Account, Integer> {
         return friendDao.getByPK(new FriendPk(accountOne, accountTwo));
     }
 
-    public Integer getFriendStatus(Integer first, Integer second) {
+    public String getFriendStatus(Integer first, Integer second) {
         return friendDao.getStatus(first, second);
     }
 
 
-    public Integer getFriendStatus(Account first, Account second) {
+    public String getFriendStatus(Account first, Account second) {
         return friendDao.getStatus(first, second);
     }
 
@@ -168,7 +168,15 @@ public class AccountService implements Serviceable<Account, Integer> {
         this.friendDao = friendDao;
     }
 
-    public List<Account> findAccountFriends(Account accountOne) {
-        return friendDao.getAccountFriends(accountOne);
+    public List<Account> findAccountFriends(Account account, int currentPage, int pageSize) {
+        return friendDao.getAccountFriends(account, currentPage, pageSize);
+    }
+
+    public List<Account> getAccountOutRequests(Account account, int currentPage, int pageSize) {
+        return friendDao.getAccountOutRequests(account, currentPage, pageSize);
+    }
+
+    public List<Account> getAccountInRequests(Account account, int currentPage, int pageSize) {
+        return friendDao.getAccountInRequests(account, currentPage, pageSize);
     }
 }

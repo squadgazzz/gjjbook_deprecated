@@ -19,13 +19,8 @@ public class Friend implements Identified<FriendPk> {
     @JoinColumn(name = "account_two_id")
     @JsonManagedReference
     private Account accountTwo;
-    /**
-     * 0 - Pending<br>
-     * 1 - Accepted<br>
-     * 2 - Declined<br>
-     * 3 - Blocked
-     */
-    private int status;
+    @Enumerated(EnumType.STRING)
+    private FriendShipStatus status; // done: 11.11.2017 сделать энум для статуса
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "action_account_id")
     @JsonManagedReference
@@ -34,7 +29,7 @@ public class Friend implements Identified<FriendPk> {
     public Friend() {
     }
 
-    public Friend(Account accountOne, Account accountTwo, int status, Account actionAccount) {
+    public Friend(Account accountOne, Account accountTwo, FriendShipStatus status, Account actionAccount) {
         this.accountOne = accountOne;
         this.accountTwo = accountTwo;
         this.status = status;
@@ -57,11 +52,11 @@ public class Friend implements Identified<FriendPk> {
         this.accountTwo = accountTwo;
     }
 
-    public int getStatus() {
+    public FriendShipStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(FriendShipStatus status) {
         this.status = status;
     }
 
@@ -80,18 +75,18 @@ public class Friend implements Identified<FriendPk> {
 
         Friend friend = (Friend) o;
 
-        if (status != friend.status) return false;
         if (!accountOne.equals(friend.accountOne)) return false;
-        if (accountTwo != null ? !accountTwo.equals(friend.accountTwo) : friend.accountTwo != null) return false;
-        return actionAccount != null ? actionAccount.equals(friend.actionAccount) : friend.actionAccount == null;
+        if (!accountTwo.equals(friend.accountTwo)) return false;
+        if (status != friend.status) return false;
+        return actionAccount.equals(friend.actionAccount);
     }
 
     @Override
     public int hashCode() {
         int result = accountOne.hashCode();
-        result = 31 * result + (accountTwo != null ? accountTwo.hashCode() : 0);
-        result = 31 * result + status;
-        result = 31 * result + (actionAccount != null ? actionAccount.hashCode() : 0);
+        result = 31 * result + accountTwo.hashCode();
+        result = 31 * result + status.hashCode();
+        result = 31 * result + actionAccount.hashCode();
         return result;
     }
 

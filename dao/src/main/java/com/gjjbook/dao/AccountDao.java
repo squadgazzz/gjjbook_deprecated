@@ -35,7 +35,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             if (avatar == null) {
                 account.setAvatar(getDefaultAvatar(account.getGender()));
             }
-            List<Phone> phones = account.getPhones(); // TODO: 04.11.2017 проверить равенство по ссылке у аккаунта и собственника телефона upd. привязать аккаунт не удалось
+            List<Phone> phones = account.getPhones();
             account.setPhones(null);
             account = entityManager.merge(account);
             entityManager.flush();
@@ -56,7 +56,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             return null;
         }
 
-        return entityManager.find(Account.class, key);  // done: 04.11.2017 переделать на метод find
+        return entityManager.find(Account.class, key);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         Root<Account> from = criteriaQuery.from(Account.class);
         CriteriaQuery<Account> select = criteriaQuery.select(from);
         TypedQuery<Account> typedQuery = entityManager.createQuery(select);
-// done: 04.11.2017 findAll нет такого метода
+
         try {
             return typedQuery.getResultList();
         } catch (NoResultException e) {
@@ -137,12 +137,11 @@ public class AccountDao extends AbstractDao<Account, Integer> {
             image = bos.toByteArray();
         }
         return image;
-    }    // done: 04.11.2017 добавить друзей
+    }
 
     public List<AccountDTO> findByPartName(String query, int currentPage, int pageSize) {
         String[] queryWords = query.split(" ");
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        // done: 04.11.2017 искать по имени или фамилии отдельно
         CriteriaQuery<AccountDTO> criteriaQuery = cb.createQuery(AccountDTO.class);
         Root<AccountDTO> from = criteriaQuery.from(AccountDTO.class);
         Predicate whereClause = getWhereClause(queryWords, cb, from);
