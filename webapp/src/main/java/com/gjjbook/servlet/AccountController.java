@@ -88,7 +88,7 @@ public class AccountController extends AbstractController {
     public ModelAndView updateAccount(@SessionAttribute(value = "loggedUser") Account loggedUser,
                                       @ModelAttribute("account") Account account,
                                       HttpServletResponse resp, HttpServletRequest req) throws IOException, DaoException {
-        if (!account.getId().equals(loggedUser.getId())) {
+        if (account.getId() != loggedUser.getId()) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "You can't edit other accounts");
             return null;
         } else {

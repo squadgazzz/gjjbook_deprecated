@@ -1,6 +1,7 @@
 package com.gjjbook.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -10,18 +11,35 @@ import java.util.List;
 
 @Entity
 @Table(name = "accounts")
+@NoArgsConstructor
+@EqualsAndHashCode(of = "email")
+@ToString
 public class Account implements Identified<Integer> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
+    @Setter
     private int id;
     @Lob
+    @Getter
+    @Setter
     private byte[] avatar;
+    @Getter
+    @Setter
     private String name;
+    @Getter
+    @Setter
     private String middleName;
+    @Getter
+    @Setter
     private String surName;
     @Enumerated(EnumType.STRING)
+    @Getter
+    @Setter
     private Gender gender;
+    @Getter
+    @Setter
     private LocalDate birthDate;
     @JsonBackReference
     @OneToMany
@@ -30,19 +48,34 @@ public class Account implements Identified<Integer> {
                     cascade = CascadeType.ALL,
                     orphanRemoval = true
             )
+    @Getter
+    @Setter
     private List<Phone> phones;
+    @Getter
+    @Setter
     private String homeAddress;
+    @Getter
+    @Setter
     private String workAddress;
+    @Getter
+    @Setter
     private String email;
+    @Getter
+    @Setter
     private String icq;
+    @Getter
+    @Setter
     private String skype;
+    @Getter
+    @Setter
     private String additionalInfo;
     @Transient
+    @Getter
+    @Setter
     private List<Account> friendList;
+    @Getter
+    @Setter
     private String password;
-
-    public Account() {
-    }
 
     public void addPhone(Phone phone) {
         if (phone == null) {
@@ -85,159 +118,12 @@ public class Account implements Identified<Integer> {
         this.password = password;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public byte[] getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(byte[] avatar) {
-        this.avatar = avatar;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getSurName() {
-        return surName;
-    }
-
-    public void setSurName(String surName) {
-        this.surName = surName;
-    }
-
-    public Gender getGender() {
-        return gender;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public List<Phone> getPhones() {
-        return phones;
-    }
-
-    public void setPhones(List<Phone> phones) {
-        this.phones = phones;
-    }
-
-    public String getHomeAddress() {
-        return homeAddress;
-    }
-
-    public void setHomeAddress(String homeAddress) {
-        this.homeAddress = homeAddress;
-    }
-
-    public String getWorkAddress() {
-        return workAddress;
-    }
-
-    public void setWorkAddress(String workAddress) {
-        this.workAddress = workAddress;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getIcq() {
-        return icq;
-    }
-
-    public void setIcq(String icq) {
-        this.icq = icq;
-    }
-
-    public String getSkype() {
-        return skype;
-    }
-
-    public void setSkype(String skype) {
-        this.skype = skype;
-    }
-
-    public String getAdditionalInfo() {
-        return additionalInfo;
-    }
-
-    public void setAdditionalInfo(String additionalInfo) {
-        this.additionalInfo = additionalInfo;
-    }
-
-    public List<Account> getFriendList() {
-        return friendList;
-    }
-
-    public void setFriendList(List<Account> friendList) {
-        this.friendList = friendList;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getStringAvatar() {
         if (avatar == null) {
             return null;
         }
 
         return Base64.getEncoder().encodeToString(avatar);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Account account = (Account) o;
-
-        if (email == null && account.email == null) {
-            return true;
-        }
-
-        return email.equals(account.email);
-    }
-
-    @Override
-    public int hashCode() {
-        return email.hashCode();
     }
 
     @Override

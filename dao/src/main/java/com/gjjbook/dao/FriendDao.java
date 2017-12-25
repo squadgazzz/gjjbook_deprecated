@@ -168,7 +168,7 @@ public class FriendDao extends AbstractDao<Friend, FriendPk> {
         List<Account> result = new ArrayList<>();
         for (Friend f : friends) {
             Account fOne = f.getAccountOne();
-            if (!fOne.getId().equals(id)) {
+            if (fOne.getId() != id) {
                 result.add(fOne);
             } else {
                 result.add(f.getAccountTwo());

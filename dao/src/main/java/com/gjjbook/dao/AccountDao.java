@@ -30,7 +30,7 @@ public class AccountDao extends AbstractDao<Account, Integer> {
         String password = account.getPassword();
         password = BCrypt.hashpw(password, BCrypt.gensalt());
         account.setPassword(password);
-        if (account.getId().equals(0)) {
+        if (account.getId() == 0) {
             byte[] avatar = account.getAvatar();
             if (avatar == null) {
                 account.setAvatar(getDefaultAvatar(account.getGender()));

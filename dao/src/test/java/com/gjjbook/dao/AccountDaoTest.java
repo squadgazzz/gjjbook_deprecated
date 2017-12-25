@@ -58,7 +58,7 @@ public class AccountDaoTest {
         Account newAcc = createTestAccount();
 
         Assert.assertNotNull(newAcc);
-        Assert.assertEquals(new Integer(1), newAcc.getId());
+        Assert.assertEquals(1, newAcc.getId());
     }
 
     @Test
