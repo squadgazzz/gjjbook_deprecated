@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <properties>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <mysql.version>5.1.42</mysql.version>
         <h2.version>1.4.196</h2.version>
         <dbcp2.version>2.1.1</dbcp2.version>
